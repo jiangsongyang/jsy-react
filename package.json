@@ -9,8 +9,8 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky install",
-    "prepare:commit-msg-hooks": "npx husky add .husky/commit-msg \"node scripts/commit-msg.mjs $1\"",
-    "prepare:pre-commit-hooks": "npx husky add .husky/pre-commit \"npx lint-staged $1\"",
+    "install:commit-msg-lint": "npx husky add .husky/commit-msg \"node scripts/commit-msg.mjs $1\"",
+    "install:pre-commit-lint": "npx husky add .husky/pre-commit \"npx lint-staged $1\"",
     "<!-- lint -->": "",
     "lint:eslint": "npx eslint \"./packages/**\" --fix",
     "lint:prettier": "npx prettier \"./packages\" --write"
