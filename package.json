@@ -2,11 +2,61 @@
   "name": "jsy-react",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "engines": {
+    "node": "16.13.0",
+    "pnpm": "7.1.7"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "preinstall": "npx only-allow pnpm",
+    "prepare": "husky install",
+    "prepare:commit-msg-hooks": "npx husky add .husky/commit-msg \"node scripts/commit-msg.mjs $1\"",
+    "prepare:pre-commit-hooks": "npx husky add .husky/pre-commit \"npx lint-staged $1\"",
+    "<!-- lint -->": "",
+    "lint:eslint": "npx eslint \"./packages/**\" --fix",
+    "lint:prettier": "npx prettier \"./packages\" --write"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pnpm precommit",
+      "commit-msg": "node scripts/commit-msg.mjs"
+    }
+  },
+  "lint-staged": {
+    "./packages/**/*.{ts,tsx}": [
+      "pnpm lint:eslint",
+      "pnpm lint:prettier",
+      "git add ."
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jiangsongyang/jsy-react.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "jiangsongyang",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/eslint": "^8.4.5",
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "^18.7.6",
+    "@types/postcss-preset-env": "^7.7.0",
+    "@types/react": "^18.0.17",
+    "@types/react-color": "^3.0.6",
+    "@types/react-dom": "^18.0.6",
+    "@typescript-eslint/eslint-plugin": "^5.33.1",
+    "@typescript-eslint/parser": "^5.33.1",
+    "chalk": "^5.0.1",
+    "eslint": "^8.22.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-config-jsy": "^1.0.4",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.4",
+    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-react": "^7.30.1",
+    "husky": "^8.0.1",
+    "prettier": "^2.7.1",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {}
 }
