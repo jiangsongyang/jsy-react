@@ -11,6 +11,7 @@
     "prepare": "husky install",
     "install:commit-msg-lint": "npx husky add .husky/commit-msg \"node scripts/commit-message-lint/commit-msg.mjs $1\"",
     "install:pre-commit-lint": "npx husky add .husky/pre-commit \"npx lint-staged $1\"",
+    "build:dev": "rimraf dist && rollup --bundleConfigAsCjs --config scripts/rollup/react.config.js",
     "<!-- lint -->": "",
     "lint:eslint": "npx eslint \"./packages/**\" --fix",
     "lint:prettier": "npx prettier \"./packages\" --write"
@@ -36,6 +37,8 @@
   "author": "jiangsongyang",
   "license": "ISC",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
     "@types/eslint": "^8.4.5",
     "@types/fs-extra": "^9.0.13",
     "@types/node": "^18.7.6",
@@ -56,7 +59,10 @@
     "eslint-plugin-react": "^7.30.1",
     "husky": "^8.0.1",
     "prettier": "^2.7.1",
+    "rimraf": "^4.0.7",
     "rollup": "^3.10.0",
+    "rollup-plugin-generate-package-json": "^3.2.0",
+    "tslib": "^2.4.1",
     "typescript": "^4.7.4"
   }
 }

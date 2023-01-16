@@ -1,6 +1,11 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "tslib": ["path/to/node_modules/tslib/tslib.d.ts"]
+    },
+    "importHelpers": true,
     "noEmit": true,
     "target": "ESNext",
     "useDefineForClassFields": true,

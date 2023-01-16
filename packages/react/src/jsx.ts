@@ -27,7 +27,7 @@ export const jsx = (type: any, config: any, ...maybeChildren: any) => {
   for (const prop in config) {
     if (['key', 'ref'].includes(prop)) {
       if (prop === 'key') {
-        key = config[prop]
+        key = `${config[prop]}`
       } else {
         ref = config[prop]
       }
