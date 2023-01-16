@@ -1,0 +1,15 @@
+{
+  "name": "react",
+  "version": "1.0.0",
+  "description": "react",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "module": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@jsy-react/shared": "workspace:^1.0.0"
+  }
+}

@@ -1,5 +1,7 @@
 {
+  "compileOnSave": true,
   "compilerOptions": {
+    "noEmit": true,
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["ESNext"],

@@ -9,7 +9,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky install",
-    "install:commit-msg-lint": "npx husky add .husky/commit-msg \"node scripts/commit-msg.mjs $1\"",
+    "install:commit-msg-lint": "npx husky add .husky/commit-msg \"node scripts/commit-message-lint/commit-msg.mjs $1\"",
     "install:pre-commit-lint": "npx husky add .husky/pre-commit \"npx lint-staged $1\"",
     "<!-- lint -->": "",
     "lint:eslint": "npx eslint \"./packages/**\" --fix",
@@ -47,16 +47,16 @@
     "@typescript-eslint/parser": "^5.33.1",
     "chalk": "^5.0.1",
     "eslint": "^8.22.0",
+    "eslint-config-jsy": "^1.0.4",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^17.0.0",
-    "eslint-config-jsy": "^1.0.4",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.2.4",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-react": "^7.30.1",
     "husky": "^8.0.1",
     "prettier": "^2.7.1",
+    "rollup": "^3.10.0",
     "typescript": "^4.7.4"
-  },
-  "dependencies": {}
+  }
 }

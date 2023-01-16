@@ -1,0 +1,69 @@
+{
+  "0 debug pnpm:scope": {
+    "selected": 2,
+    "total": 3,
+    "workspacePrefix": "/Users/jiangsongyang/Documents/study/jsy-react"
+  },
+  "1 debug pnpm:package-manifest": {
+    "initial": {
+      "name": "react",
+      "version": "1.0.0",
+      "description": "react",
+      "module": "index.ts",
+      "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+      },
+      "keywords": [],
+      "author": "",
+      "license": "ISC"
+    },
+    "prefix": "/Users/jiangsongyang/Documents/study/jsy-react/packages/react"
+  },
+  "2 debug pnpm:package-manifest": {
+    "initial": {
+      "name": "shared",
+      "version": "1.0.0",
+      "description": "",
+      "main": "index.js",
+      "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+      },
+      "keywords": [],
+      "author": "",
+      "license": "ISC"
+    },
+    "prefix": "/Users/jiangsongyang/Documents/study/jsy-react/packages/shared"
+  },
+  "3 debug pnpm:context": {
+    "currentLockfileExists": true,
+    "storeDir": "/Users/jiangsongyang/Library/pnpm/store/v3",
+    "virtualStoreDir": "/Users/jiangsongyang/Documents/study/jsy-react/node_modules/.pnpm"
+  },
+  "4 debug pnpm:stage": {
+    "prefix": "/Users/jiangsongyang/Documents/study/jsy-react",
+    "stage": "resolution_started"
+  },
+  "5 error pnpm": {
+    "code": "ERR_PNPM_FETCH_404",
+    "hint": "@jsy-react/shared is not in the npm registry, or you have no permission to fetch it.\n\nNo authorization header was set for the request.",
+    "request": {
+      "url": "https://registry.npmjs.org/@jsy-react%2Fshared"
+    },
+    "response": {
+      "size": 0
+    },
+    "pkgName": "@jsy-react/shared",
+    "spec": {
+      "fetchSpec": "latest",
+      "name": "@jsy-react/shared",
+      "type": "tag"
+    },
+    "pkgsStack": [],
+    "err": {
+      "name": "pnpm",
+      "message": "GET https://registry.npmjs.org/@jsy-react%2Fshared: Not Found - 404",
+      "code": "ERR_PNPM_FETCH_404",
+      "stack": "pnpm: GET https://registry.npmjs.org/@jsy-react%2Fshared: Not Found - 404\n    at RetryOperation._fn (/Users/jiangsongyang/.nvm/versions/node/v16.13.0/lib/node_modules/pnpm/dist/pnpm.cjs:84475:19)\n    at processTicksAndRejections (node:internal/process/task_queues:96:5)"
+    }
+  }
+}

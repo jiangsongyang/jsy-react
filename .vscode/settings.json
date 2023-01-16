@@ -1,4 +1,12 @@
 {
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
   "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "files.exclude": {
+    "**/.git": false
+  },
   "typescript.tsdk": "node_modules/typescript/lib"
 }
