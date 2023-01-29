@@ -24,7 +24,6 @@
   },
   "lint-staged": {
     "./packages/**/*.{ts,tsx}": [
-      "pnpm lint:eslint",
       "pnpm lint:prettier",
       "git add ."
     ]

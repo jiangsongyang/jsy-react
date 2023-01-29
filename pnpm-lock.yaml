@@ -66,6 +66,12 @@ importers:
     dependencies:
       '@jsy-react/shared': link:../shared
 
+  packages/react-reconciler:
+    specifiers:
+      '@jsy-react/shared': workspace:^1.0.0
+    dependencies:
+      '@jsy-react/shared': link:../shared
+
   packages/shared:
     specifiers:
       '@jsy-react/shared': workspace:^1.0.0

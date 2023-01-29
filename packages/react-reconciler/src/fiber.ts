@@ -1,0 +1,100 @@
+import type { Key, Props } from '@jsy-react/shared'
+import type { Container } from 'hostConfig'
+import type { WorkTag } from './workTags'
+import { Flags, NoFlags } from './fiberFlags'
+
+export class FiberNode {
+  tag: WorkTag
+  key: Key
+  stateNode: any
+  type: any
+
+  return: FiberNode | null
+  sibling: FiberNode | null
+  child: FiberNode | null
+  index: number
+
+  ref: any
+
+  // 开始准备工作的时候 props 的值
+  pendingProps: Props | null
+  // 工作完成后 props 的值
+  memoizedProps: Props | null
+  memoizedState: any
+  updateQueue: unknown
+
+  alertnate: FiberNode | null
+
+  flags: Flags
+
+  constructor(tag: WorkTag, pendingProps: Props, key: Key) {
+    // 实例相关信息
+    this.tag = tag
+    this.key = key
+    this.stateNode = null
+    this.type = null
+
+    // 树结构 节点位置相关信息
+    // 父fiber
+    this.return = null
+    this.sibling = null
+    this.child = null
+    this.index = 0
+
+    this.ref = null
+
+    // 作为工作单元相关信息
+    this.pendingProps = pendingProps
+    this.memoizedProps = null
+    this.memoizedState = null
+    this.updateQueue = null
+
+    // 双缓存
+    this.alertnate = null
+
+    // 副作用
+    this.flags = NoFlags
+  }
+}
+
+export class FiberRootNode {
+  container: Container
+  current: FiberNode
+  finishWork: FiberNode | null
+
+  constructor(container: Container, hostRootFiber: FiberNode) {
+    this.container = container
+    this.current = hostRootFiber
+    hostRootFiber.stateNode = this
+    this.finishWork = null
+  }
+}
+
+export const createWorkInProgress = (current: FiberNode, pendingProps: Props): FiberNode => {
+  let workInProgress = current.alertnate
+  // 首屏渲染
+  // mount
+  if (workInProgress === null) {
+    workInProgress = new FiberNode(current.tag, pendingProps, current.key)
+    workInProgress.stateNode = current.stateNode
+
+    // 处理双缓存
+    workInProgress.alertnate = current
+    current.alertnate = workInProgress
+  }
+  // 首屏渲染
+  // update
+  else {
+    workInProgress.pendingProps = pendingProps
+    // 清空副作用
+    workInProgress.flags = NoFlags
+  }
+
+  workInProgress.type = current.type
+  workInProgress.updateQueue = current.updateQueue
+  workInProgress.child = current.child
+  workInProgress.memoizedProps = current.memoizedProps
+  workInProgress.memoizedState = current.memoizedState
+
+  return workInProgress
+}

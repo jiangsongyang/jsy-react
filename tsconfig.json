@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "tslib": ["path/to/node_modules/tslib/tslib.d.ts"]
+      "tslib": ["path/to/node_modules/tslib/tslib.d.ts"],
+      "hostConfig": ["./packages/react-reconciler/src/hostConfig.ts"]
     },
     "importHelpers": true,
     "noEmit": true,
