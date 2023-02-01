@@ -1,6 +1,6 @@
-import type { Key, Props } from '@jsy-react/shared'
+import type { Key, Props, ReactElement } from '@jsy-react/shared'
 import type { Container } from 'hostConfig'
-import type { WorkTag } from './workTags'
+import { FunctionComponent, HostComponent, WorkTag } from './workTags'
 import { Flags, NoFlags } from './fiberFlags'
 
 export class FiberNode {
@@ -23,7 +23,7 @@ export class FiberNode {
   memoizedState: any
   updateQueue: unknown
 
-  alertnate: FiberNode | null
+  alternate: FiberNode | null
 
   flags: Flags
 
@@ -50,7 +50,7 @@ export class FiberNode {
     this.updateQueue = null
 
     // 双缓存
-    this.alertnate = null
+    this.alternate = null
 
     // 副作用
     this.flags = NoFlags
@@ -71,7 +71,7 @@ export class FiberRootNode {
 }
 
 export const createWorkInProgress = (current: FiberNode, pendingProps: Props): FiberNode => {
-  let workInProgress = current.alertnate
+  let workInProgress = current.alternate
   // 首屏渲染
   // mount
   if (workInProgress === null) {
@@ -79,8 +79,8 @@ export const createWorkInProgress = (current: FiberNode, pendingProps: Props): F
     workInProgress.stateNode = current.stateNode
 
     // 处理双缓存
-    workInProgress.alertnate = current
-    current.alertnate = workInProgress
+    workInProgress.alternate = current
+    current.alternate = workInProgress
   }
   // 首屏渲染
   // update
@@ -97,4 +97,21 @@ export const createWorkInProgress = (current: FiberNode, pendingProps: Props): F
   workInProgress.memoizedState = current.memoizedState
 
   return workInProgress
+}
+
+export const createFiberFromElement = (element: ReactElement): FiberNode => {
+  const { type, key, props } = element
+
+  let fiberTag: WorkTag = FunctionComponent
+
+  if (typeof type === 'string') {
+    // <div> => type = 'div'
+    fiberTag = HostComponent
+  } else if (typeof type === 'function' && __DEV__) {
+    console.warn(`未定义的类型：`, type)
+  }
+
+  const fiber = new FiberNode(fiberTag, props, key)
+  fiber.type = type
+  return fiber
 }

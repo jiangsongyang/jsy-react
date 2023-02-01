@@ -42,13 +42,16 @@ export const renderRoot = (root: FiberRootNode) => {
       workLoop()
       break
     } catch (e) {
-      console.warn(`work loop error :`, e)
+      if (__DEV__) {
+        console.warn(`work loop error :`, e)
+      }
       workInProgress = null
     }
   } while (true)
 }
 
 const workLoop = () => {
+  // eslint-disable-next-line no-unmodified-loop-condition
   while (workInProgress !== null) {
     performUnitOfWork(workInProgress)
   }

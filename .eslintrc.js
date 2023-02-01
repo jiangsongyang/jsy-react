@@ -16,10 +16,8 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['react'],
-  settings: {
-   
-  },
+  settings: {},
   rules: {
-   
+    'no-undef': 'off',
   },
 }

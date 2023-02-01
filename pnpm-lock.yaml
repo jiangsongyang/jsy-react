@@ -5,6 +5,7 @@ importers:
   .:
     specifiers:
       '@rollup/plugin-commonjs': ^24.0.0
+      '@rollup/plugin-replace': ^5.0.2
       '@rollup/plugin-typescript': ^11.0.0
       '@types/eslint': ^8.4.5
       '@types/fs-extra': ^9.0.13
@@ -33,6 +34,7 @@ importers:
       typescript: ^4.7.4
     devDependencies:
       '@rollup/plugin-commonjs': 24.0.0_rollup@3.10.0
+      '@rollup/plugin-replace': 5.0.2_rollup@3.10.0
       '@rollup/plugin-typescript': 11.0.0_6xbyoujvh6bzbrau3o3neoxpya
       '@types/eslint': 8.4.10
       '@types/fs-extra': 9.0.13
@@ -288,6 +290,20 @@ packages:
       estree-walker: 2.0.2
       glob: 8.1.0
       is-reference: 1.2.1
+      magic-string: 0.27.0
+      rollup: 3.10.0
+    dev: true
+
+  /@rollup/plugin-replace/5.0.2_rollup@3.10.0:
+    resolution: {integrity: sha512-M9YXNekv/C/iHHK+cvORzfRYfPbq0RDD8r0G+bMiTXjNGKulPnCT9O3Ss46WfhI6ZOCgApOP7xAdmCQJ+U2LAA==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+    dependencies:
+      '@rollup/pluginutils': 5.0.2_rollup@3.10.0
       magic-string: 0.27.0
       rollup: 3.10.0
     dev: true
