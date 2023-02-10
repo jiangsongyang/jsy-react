@@ -26,6 +26,7 @@ export class FiberNode {
   alternate: FiberNode | null
 
   flags: Flags
+  subtreeFlags: Flags
 
   constructor(tag: WorkTag, pendingProps: Props, key: Key) {
     // 实例相关信息
@@ -54,6 +55,7 @@ export class FiberNode {
 
     // 副作用
     this.flags = NoFlags
+    this.subtreeFlags = NoFlags
   }
 }
 
@@ -88,6 +90,7 @@ export const createWorkInProgress = (current: FiberNode, pendingProps: Props): F
     workInProgress.pendingProps = pendingProps
     // 清空副作用
     workInProgress.flags = NoFlags
+    workInProgress.subtreeFlags = NoFlags
   }
 
   workInProgress.type = current.type
