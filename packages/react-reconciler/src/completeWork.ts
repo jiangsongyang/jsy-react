@@ -49,7 +49,7 @@ export const completeWork = (workInProgress: FiberNode) => {
       return null
     default:
       if (__DEV__) {
-        console.log(`completeWork 未实现的类型 : `, workInProgress.tag)
+        console.warn(`completeWork 未实现的类型 : `, workInProgress.tag)
       }
       break
   }

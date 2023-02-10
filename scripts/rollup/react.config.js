@@ -14,6 +14,7 @@ export default [
       name: 'index.js',
       file: `${pkgDistPath}/index.js`,
       format: 'umd',
+      sourcemap: true,
     },
     plugins: [
       ...getBaseRollupPlugins(),
@@ -38,12 +39,14 @@ export default [
         name: 'jsx-runtime.js',
         file: `${pkgDistPath}/jsx-runtime.js`,
         format: 'umd',
+        sourcemap: true,
       },
       // jsx-dev-runtime
       {
         name: 'jsx-dev-runtime.js',
         file: `${pkgDistPath}/jsx-dev-runtime.js`,
         format: 'umd',
+        sourcemap: true,
       },
     ],
     plugins: getBaseRollupPlugins(),

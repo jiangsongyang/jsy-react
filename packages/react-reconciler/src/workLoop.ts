@@ -23,10 +23,12 @@ export const scheduleUpdateOnFiber = (fiber: FiberNode) => {
 const markUpdateFromFiberToRoot = (fiber: FiberNode) => {
   let node = fiber
   let parent = node.return
+
   while (parent !== null) {
     node = parent
     parent = node.return
   }
+
   if (node.tag === HostRoot) {
     return node.stateNode
   }
@@ -53,6 +55,7 @@ export const renderRoot = (root: FiberRootNode) => {
   } while (true)
 
   const finishedWork = root.current.alternate
+  // 保存工作结果
   root.finishedWork = finishedWork
 
   // workinprogress fiberNode树 树中的 flags
@@ -84,7 +87,7 @@ const commitRoot = (root: FiberRootNode) => {
 
   const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags
 
-  if (rootHasEffect || subtreeFlasg) {
+  if (subtreeFlasg || rootHasEffect) {
     // 执行3个子阶段
     // 1. beforeMutation
     // 2. mutation

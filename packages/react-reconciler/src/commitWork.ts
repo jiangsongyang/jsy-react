@@ -7,7 +7,6 @@ let nextEffect: FiberNode | null = null
 
 export const commitMutationEffects = (finishedWork: FiberNode) => {
   nextEffect = finishedWork
-
   while (nextEffect !== null) {
     // 向下遍历
     const child: FiberNode | null = nextEffect.child
@@ -45,12 +44,12 @@ const commitMutationEffectsOnFiber = (finishedWork: FiberNode) => {
 
 const commitPlacement = (finishedWork: FiberNode) => {
   if (__DEV__) {
-    console.log(`执行 placement 操作 : `, finishedWork)
+    console.warn(`执行 placement 操作 : `, finishedWork)
   }
   // parent DOM
   const parentHost = getHostParent(finishedWork)
   // 找 finishedWork 中的 DOM
-  if (parentHost === null) {
+  if (parentHost) {
     appendPlacementNodeIntoContainer(finishedWork, parentHost)
   }
 }
@@ -76,7 +75,7 @@ const getHostParent = (fiber: FiberNode) => {
 const appendPlacementNodeIntoContainer = (finishedWork: FiberNode, hostParent: Container) => {
   // fiber -> host fiber
   if (finishedWork.tag === HostComponent || finishedWork.tag === HostText) {
-    appendChildToContainer(finishedWork.stateNode, hostParent)
+    appendChildToContainer(hostParent, finishedWork.stateNode)
     return
   }
   const child = finishedWork.child

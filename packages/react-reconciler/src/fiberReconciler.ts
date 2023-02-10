@@ -16,10 +16,12 @@ export const createContainer = (container: Container) => {
 
 export const updateContainer = (element: ReactElement | null, root: FiberRootNode) => {
   const hostRootFiber = root.current
+  // 创建一个更新任务 拿到需要更新的 jsx
   const update = createUpdate<ReactElement | null>(element)
 
   enqueueUpdate(hostRootFiber.updateQueue as UpdateQueue<ReactElement | null>, update)
 
+  // 开始给 fiber 节点调度更新任务
   scheduleUpdateOnFiber(hostRootFiber)
 
   return element

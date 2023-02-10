@@ -16,11 +16,13 @@ export default [
         name: 'index.js',
         file: `${pkgDistPath}/index.js`,
         format: 'umd',
+        sourcemap: true,
       },
       {
         name: 'client.js',
         file: `${pkgDistPath}/client.js`,
         format: 'umd',
+        sourcemap: true,
       },
     ],
     plugins: [

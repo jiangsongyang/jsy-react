@@ -17,7 +17,7 @@ export const beginWork = (workInProgress: FiberNode) => {
       return null
     default:
       if (__DEV__) {
-        console.log(`beginWork 未实现的类型 : `, workInProgress.tag)
+        console.warn(`beginWork 未实现的类型 : `, workInProgress.tag)
       }
       break
   }
@@ -26,6 +26,8 @@ export const beginWork = (workInProgress: FiberNode) => {
 
 // 计算状态的最新值
 const updateHostRoot = (workInProgress: FiberNode) => {
+  console.log(`updateHostRoot`, workInProgress)
+
   const baseState = workInProgress.memoizedState
   const updateQueue = workInProgress.updateQueue as UpdateQueue<Element>
   const pending = updateQueue.shared.pending!

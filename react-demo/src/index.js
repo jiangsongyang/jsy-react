@@ -1,13 +1,14 @@
 import React from 'react'
-import * as ReactDOM from 'react-dom'
-
-console.log('React: ', React)
-console.log('ReactDOM: ', ReactDOM)
+import ReactDOM from 'react-dom'
 
 const jsx = (
   <div>
-    JSX , <span>test child</span>
+    <span>test child</span>
   </div>
 )
 
+ReactDOM.createRoot(document.getElementById('root')).render(jsx)
+
+console.log('React: ', React)
+console.log('ReactDOM: ', ReactDOM)
 console.log('JSX: ', jsx)
