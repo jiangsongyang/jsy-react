@@ -50,7 +50,9 @@ const commitPlacement = (finishedWork: FiberNode) => {
   // parent DOM
   const parentHost = getHostParent(finishedWork)
   // 找 finishedWork 中的 DOM
-  appendPlacementNodeIntoContainer(finishedWork, parentHost)
+  if (parentHost === null) {
+    appendPlacementNodeIntoContainer(finishedWork, parentHost)
+  }
 }
 
 const getHostParent = (fiber: FiberNode) => {
