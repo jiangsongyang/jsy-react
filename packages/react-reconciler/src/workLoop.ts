@@ -48,6 +48,9 @@ export const renderRoot = (root: FiberRootNode) => {
       workInProgress = null
     }
   } while (true)
+
+  const finishedWork = root.current.alternate
+  root.finishedWork = finishedWork
 }
 
 const workLoop = () => {
@@ -72,7 +75,7 @@ const performUnitOfWork = (fiber: FiberNode) => {
 const completeUnitOfWork = (fiber: FiberNode) => {
   let node: FiberNode | null = fiber
   do {
-    completeWork()
+    completeWork(node)
     // 处理兄弟节点
     const sibling = node.sibling
     if (sibling !== null) {

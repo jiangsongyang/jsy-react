@@ -19,8 +19,9 @@ export const beginWork = (workInProgress: FiberNode) => {
       if (__DEV__) {
         console.log(`beginWork 未实现的类型 : `, workInProgress.tag)
       }
-      return null
+      break
   }
+  return null
 }
 
 // 计算状态的最新值
