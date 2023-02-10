@@ -19,5 +19,7 @@ module.exports = {
   settings: {},
   rules: {
     'no-undef': 'off',
+    'no-labels': 'off',
+    'no-restricted-syntax': 'off',
   },
 }

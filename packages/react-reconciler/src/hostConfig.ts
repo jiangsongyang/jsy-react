@@ -14,3 +14,8 @@ export const createTextInstance = (...args: any) => {
   console.log('args: ', args)
   return {} as any
 }
+
+export const appendChildToContainer = (...args: any) => {
+  console.log('args: ', args)
+  return {} as any
+}

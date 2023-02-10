@@ -1,6 +1,8 @@
 import { beginWork } from './beginWork'
+import { commitMutationEffects } from './commitWork'
 import { completeWork } from './completeWork'
 import { FiberNode, FiberRootNode, createWorkInProgress } from './fiber'
+import { MutationMask, NoFlags } from './fiberFlags'
 import { HostRoot } from './workTags'
 
 let workInProgress: FiberNode | null = null
@@ -32,6 +34,7 @@ const markUpdateFromFiberToRoot = (fiber: FiberNode) => {
   return null
 }
 
+// 渲染阶段的入口方法
 export const renderRoot = (root: FiberRootNode) => {
   // 初始化
   // 让 workInProgress 指向 第一个 fiberNode 也就是 FiberRootNode
@@ -51,6 +54,48 @@ export const renderRoot = (root: FiberRootNode) => {
 
   const finishedWork = root.current.alternate
   root.finishedWork = finishedWork
+
+  // workinprogress fiberNode树 树中的 flags
+  commitRoot(root)
+}
+/**
+ * commit 阶段的3个子阶段
+ * 1. beforeMutation
+ * 2. mutation
+ * 3. layout
+ */
+const commitRoot = (root: FiberRootNode) => {
+  const finishedWork = root.finishedWork
+
+  if (finishedWork === null) {
+    return
+  }
+
+  if (__DEV__) {
+    console.log(`commit阶段开始 : `, finishedWork)
+  }
+
+  // 重置
+  root.finishedWork = null
+
+  // 判断是否存在3个子阶段需要执行的操作
+  // root flags , root subtreeFlags
+  const subtreeFlasg = (finishedWork.subtreeFlags & MutationMask) !== NoFlags
+
+  const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags
+
+  if (rootHasEffect || subtreeFlasg) {
+    // 执行3个子阶段
+    // 1. beforeMutation
+    // 2. mutation
+    commitMutationEffects(finishedWork)
+    // 更换双缓存
+    root.current = finishedWork
+    // 3. layout
+  } else {
+    // 更换双缓存
+    root.current = finishedWork
+  }
 }
 
 const workLoop = () => {
