@@ -20,6 +20,7 @@ export class FiberNode {
   pendingProps: Props | null
   // 工作完成后 props 的值
   memoizedProps: Props | null
+  // 指向一个 fc 的 hook 链表的第 0 个
   memoizedState: any
   updateQueue: unknown
 

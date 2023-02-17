@@ -13,8 +13,6 @@ const prepareFreshStack = (root: FiberRootNode) => {
 }
 
 export const scheduleUpdateOnFiber = (fiber: FiberNode) => {
-  // 调度功能
-  // 这个 root 是 fiberRootNode
   const root = markUpdateFromFiberToRoot(fiber)
 
   renderRoot(root)

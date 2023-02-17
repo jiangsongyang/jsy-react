@@ -9,6 +9,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "peerDependencies": {
+    "react": "workspace:*"
+  },
   "dependencies": {
     "@jsy-react/shared": "workspace:^1.0.0"
   }

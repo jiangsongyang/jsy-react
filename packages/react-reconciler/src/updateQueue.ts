@@ -1,4 +1,5 @@
 import type { Action } from '@jsy-react/shared'
+import { Dispatch } from 'react/src/currentDispatcher'
 
 export interface Update<State> {
   action: Action<State>
@@ -8,6 +9,7 @@ export interface UpdateQueue<State> {
   shared: {
     pending: Update<State> | null
   }
+  dispatch: Dispatch<State> | null
 }
 
 /** 创建更新 */
@@ -23,6 +25,7 @@ export const createUpdateQueue = <State>() => {
     shared: {
       pending: null,
     },
+    dispatch: null,
   } as UpdateQueue<State>
 }
 
