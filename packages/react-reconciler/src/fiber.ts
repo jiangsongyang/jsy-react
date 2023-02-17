@@ -111,6 +111,7 @@ export const createFiberFromElement = (element: ReactElement): FiberNode => {
     // <div> => type = 'div'
     fiberTag = HostComponent
   } else if (typeof type === 'function') {
+    // function component
     fiberTag = FunctionComponent
   }
 

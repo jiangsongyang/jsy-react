@@ -11,6 +11,9 @@
     "prepare": "husky install",
     "install:commit-msg-lint": "npx husky add .husky/commit-msg \"node scripts/commit-message-lint/commit-msg.mjs $1\"",
     "install:pre-commit-lint": "npx husky add .husky/pre-commit \"npx lint-staged $1\"",
+    "<!-- dev -->": "",
+    "dev:demo": "vite serve demos/test-fc --config ./scripts/vite/vite.config.js --force",
+    "<!-- build -->": "",
     "build:dev": "rimraf dist && rollup --bundleConfigAsCjs --config scripts/rollup/dev.config.js -w",
     "<!-- lint -->": "",
     "lint:eslint": "npx eslint \"./packages/**\" --fix",
@@ -37,6 +40,8 @@
   "author": "jiangsongyang",
   "license": "ISC",
   "devDependencies": {
+    "@vitejs/plugin-react": "^3.1.0",
+    "vite": "^4.0.0",
     "@rollup/plugin-alias": "^4.0.3",
     "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-replace": "^5.0.2",

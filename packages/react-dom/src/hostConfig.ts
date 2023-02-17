@@ -1,8 +1,11 @@
 export type Container = Element
 export type Instance = Element
 
-export const createInstance = (type: string, props: any): Instance => {
-  console.log('props: ', props)
+export const createInstance = (
+  type: string,
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  props: any
+): Instance => {
   const element = document.createElement(type)
   return element
 }
