@@ -9,6 +9,7 @@ const { currentDispatcher } = internals
 
 export interface Hook {
   /**
+   *
    * 这个跟 fiberNode 里的 memoizedState 不一样
    * FiberNode 里的 memoizedState 是指向一个 fc 的 hook 链表的第 0 个
    * 而这个 memoizedState 是指 当前 hook 的状态
@@ -24,13 +25,16 @@ let currentRenderingFiber: FiberNode | null = null
 let workInProgressHook: Hook | null = null
 
 export const renderWithHooks = (workInProgress: FiberNode) => {
+  // 保存当前工作的 fiber
   currentRenderingFiber = workInProgress
-
   // 重置
   workInProgress.memoizedState = null
 
   const current = workInProgress.alternate
 
+  // 判断是 mount 还是 update
+  // 根据场景不同 将 shared 里的 currentDispatcher.current 指向不同的 hooksDispatcher
+  // 在执行 fc 的时候就可以拿到对应的 hooksDispatcher
   if (current) {
     // update
   } else {
