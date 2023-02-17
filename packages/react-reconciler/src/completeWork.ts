@@ -3,7 +3,7 @@
 import { Container, appendInitialChild, createInstance, createTextInstance } from 'hostConfig'
 import { FiberNode } from './fiber'
 import { NoFlags } from './fiberFlags'
-import { HostComponent, HostRoot, HostText } from './workTags'
+import { FunctionComponent, HostComponent, HostRoot, HostText } from './workTags'
 
 export const completeWork = (workInProgress: FiberNode) => {
   const newProps = workInProgress.pendingProps
@@ -45,6 +45,9 @@ export const completeWork = (workInProgress: FiberNode) => {
       bubbleProperties(workInProgress)
       return null
     case HostRoot:
+      bubbleProperties(workInProgress)
+      return null
+    case FunctionComponent:
       bubbleProperties(workInProgress)
       return null
     default:

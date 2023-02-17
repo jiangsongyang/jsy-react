@@ -3,8 +3,9 @@
 import { ReactElement } from 'packages/shared'
 import { mountChildFibers, reconcileChildFibers } from './childFibers'
 import { FiberNode } from './fiber'
+import { renderWithHooks } from './fiberHooks'
 import { UpdateQueue, processUpdateQueue } from './updateQueue'
-import { HostComponent, HostRoot, HostText } from './workTags'
+import { FunctionComponent, HostComponent, HostRoot, HostText } from './workTags'
 
 export const beginWork = (workInProgress: FiberNode) => {
   // 返回比较完成的 子 fiberNode
@@ -15,6 +16,8 @@ export const beginWork = (workInProgress: FiberNode) => {
       return updateHostComponent(workInProgress)
     case HostText:
       return null
+    case FunctionComponent:
+      return updateFunctionComponent(workInProgress)
     default:
       if (__DEV__) {
         console.warn(`beginWork 未实现的类型 : `, workInProgress.tag)
@@ -22,6 +25,14 @@ export const beginWork = (workInProgress: FiberNode) => {
       break
   }
   return null
+}
+
+const updateFunctionComponent = (workInProgress: FiberNode) => {
+  console.log(`updateFunctionComponent`, workInProgress)
+
+  const nextChildren = renderWithHooks(workInProgress)
+  reconcileChildren(workInProgress, nextChildren)
+  return workInProgress.child
 }
 
 // 计算状态的最新值
@@ -43,6 +54,8 @@ const updateHostRoot = (workInProgress: FiberNode) => {
 }
 
 const updateHostComponent = (workInProgress: FiberNode) => {
+  console.log(`updateHostComponent`, workInProgress)
+
   const nextProps = workInProgress.pendingProps
   const nextChildren = nextProps.children
   reconcileChildren(workInProgress, nextChildren)
