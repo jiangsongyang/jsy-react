@@ -60,7 +60,7 @@ const getHostParent = (fiber: FiberNode) => {
   while (parent) {
     const parentTag = parent.tag
     if (parentTag === HostComponent) {
-      return parent as Container
+      return parent.stateNode as Container
     }
     if (parentTag === HostRoot) {
       return (parent.stateNode as FiberRootNode).container

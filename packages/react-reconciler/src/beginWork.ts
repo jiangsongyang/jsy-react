@@ -1,6 +1,6 @@
 // 递归中的递
 
-import { ReactElement } from 'packages/shared'
+import { ReactElement } from '@jsy-react/shared'
 import { mountChildFibers, reconcileChildFibers } from './childFibers'
 import { FiberNode } from './fiber'
 import { renderWithHooks } from './fiberHooks'

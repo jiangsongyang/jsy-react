@@ -1,4 +1,4 @@
-import { ReactElement } from 'packages/shared'
+import { ReactElement } from '@jsy-react/shared'
 import { createContainer, updateContainer } from 'react-reconciler/src/fiberReconciler'
 import { Container } from './hostConfig'
 
@@ -7,7 +7,7 @@ export const createRoot = (container: Container) => {
 
   return {
     render(element: ReactElement) {
-      updateContainer(element, root)
+      return updateContainer(element, root)
     },
   }
 }

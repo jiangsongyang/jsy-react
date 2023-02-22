@@ -1,5 +1,4 @@
-import { ReactElement } from 'packages/shared'
-import { REACT_ELEMENT_TYPE } from '@jsy-react/shared'
+import { REACT_ELEMENT_TYPE, ReactElement } from '@jsy-react/shared'
 import { FiberNode, createFiberFromElement } from './fiber'
 import { HostText } from './workTags'
 import { Placement } from './fiberFlags'

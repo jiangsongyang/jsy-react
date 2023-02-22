@@ -1,4 +1,4 @@
-import type { Action } from 'packages/shared'
+import type { Action } from '@jsy-react/shared'
 
 export type Dispatch<State> = (action: Action<State>) => void
 

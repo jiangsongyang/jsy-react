@@ -26,14 +26,16 @@ export const jsx = (type: any, config: any, ...maybeChildren: any) => {
 
   for (const prop in config) {
     if (['key', 'ref'].includes(prop)) {
+      if (config[prop] === undefined) continue
       if (prop === 'key') {
         key = `${config[prop]}`
       } else {
         ref = config[prop]
       }
-    }
-    if (Object.prototype.hasOwnProperty.call(config, prop)) {
-      props[prop] = config[prop]
+    } else {
+      if (Object.prototype.hasOwnProperty.call(config, prop)) {
+        props[prop] = config[prop]
+      }
     }
   }
 
@@ -64,4 +66,8 @@ export const jsxDEV = (type: any, config: any) => {
   }
 
   return ReactElement(type, key, ref, props)
+}
+
+export const isValidElementFn = (object: any) => {
+  return typeof object === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE
 }
