@@ -22,5 +22,6 @@ module.exports = {
     'no-undef': 'off',
     'no-labels': 'off',
     'no-restricted-syntax': 'off',
+    'no-case-declarations': 'off',
   },
 }
