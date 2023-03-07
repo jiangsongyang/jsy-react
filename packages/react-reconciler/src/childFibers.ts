@@ -21,8 +21,8 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
     element: ReactElement
   ) => {
     const key = element.key
+    // update
     work: if (currentFiber !== null) {
-      // update
       if (key === currentFiber.key) {
         // key 相同
         if (element.$$typeof === REACT_ELEMENT_TYPE) {
@@ -32,6 +32,7 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
             existing.return = returnFiber
             return existing
           } else {
+            // 不可复用
             // 删掉旧的
             deleteChild(returnFiber, currentFiber)
             break work
@@ -62,7 +63,7 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
     if (currrentFiber !== null) {
       // update
       if (currrentFiber.tag === HostText) {
-        // 类型没变 -- 客服用
+        // 类型没变 -- 客复用
         const existing = useFiber(currrentFiber, { content })
         existing.return = returnFiber
         return existing

@@ -37,23 +37,19 @@ const commitMutationEffectsOnFiber = (finishedWork: FiberNode) => {
 
   if ((flags & Placement) !== NoFlags) {
     commitPlacement(finishedWork)
-    // 移除 placement flasg
     finishedWork.flags &= ~Placement
   }
   if ((flags & Update) !== NoFlags) {
-    // 处理 update flags
     commitUpdate(finishedWork)
     finishedWork.flags &= ~Update
   }
   if ((flags & ChildDeletion) !== NoFlags) {
-    // 处理 childDeletions flags
     const deletions = finishedWork.deletions
     if (deletions !== null) {
       deletions.forEach(childToDelete => {
         commitDeletion(childToDelete)
       })
     }
-    commitUpdate(finishedWork)
     finishedWork.flags &= ~ChildDeletion
   }
 }
@@ -97,7 +93,7 @@ const commitDeletion = (childToDelete: FiberNode) => {
   // 移除 DOM
   if (rootHostNode !== null) {
     const hostParent = getHostParent(childToDelete)
-    if (hostParent) removeChild(rootHostNode, hostParent)
+    if (hostParent) removeChild((rootHostNode as FiberNode).stateNode, hostParent)
   } else {
     if (__DEV__) {
       console.warn(`没有找到 rootHostNode`)

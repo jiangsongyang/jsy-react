@@ -2,19 +2,15 @@ import { useState } from 'react'
 import ReactDOM from 'react-dom/client'
 
 const App = () => {
-  return (
-    <div>
-      <Child />
-    </div>
-  )
-}
-
-const Child = () => {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(1)
 
   window.setCount = setCount
 
-  return <div>{count}</div>
+  return count === 3 ? <Child /> : <div>{count}</div>
+}
+
+const Child = () => {
+  return <div>this is child</div>
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(<App />)
