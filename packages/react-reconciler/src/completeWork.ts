@@ -1,6 +1,7 @@
 // 递归中的归
 
 import { Container, appendInitialChild, createInstance, createTextInstance } from 'hostConfig'
+import { updateFiberProps } from 'react-dom/src/SyntheicEvent'
 import { FiberNode } from './fiber'
 import { NoFlags, Update } from './fiberFlags'
 import { FunctionComponent, HostComponent, HostRoot, HostText } from './workTags'
@@ -17,7 +18,8 @@ export const completeWork = (workInProgress: FiberNode) => {
     case HostComponent:
       if (current !== null && current.stateNode !== null) {
         // update
-        // 暂不处理
+        // 判断 props 是否变化
+        updateFiberProps(workInProgress.stateNode, newProps)
       } else {
         // 构建 DOM
         // 将 DOM 插入到 DOM 树中

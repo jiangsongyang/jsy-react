@@ -1,16 +1,17 @@
 import { FiberNode } from 'react-reconciler/src/fiber'
-import { HostText } from 'react-reconciler/src/workTags'
+import { HostComponent, HostText } from 'react-reconciler/src/workTags'
+import { Props } from 'shared'
+import { updateFiberProps } from './SyntheicEvent'
+import type { DOMElement } from './SyntheicEvent'
 
 export type Container = Element
 export type Instance = Element
 export type TextInstance = Text
 
-export const createInstance = (
-  type: string,
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-  props: any
-): Instance => {
-  const element = document.createElement(type)
+export const createInstance = (type: string, props: Props): Instance => {
+  const element = document.createElement(type) as unknown as DOMElement
+  // mount 时记录 props
+  updateFiberProps(element, props)
   return element
 }
 
@@ -31,6 +32,9 @@ export const commitUpdate = (fiber: FiberNode) => {
     case HostText:
       const text = fiber.memoizedProps.content
       return commitTextUpdatevalue(fiber.stateNode, text)
+    case HostComponent:
+      updateFiberProps(fiber.stateNode, fiber.memoizedProps)
+      return
     default:
       if (__DEV__) {
         console.error(`未实现的 update 类型`)

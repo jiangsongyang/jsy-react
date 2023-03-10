@@ -4,13 +4,7 @@ import ReactDOM from 'react-dom/client'
 const App = () => {
   const [count, setCount] = useState(1)
 
-  ;(window as any).setCount = setCount
-
-  return count === 3 ? <Child /> : <div>{count}</div>
-}
-
-const Child = () => {
-  return <div>this is child</div>
+  return <div onClick={() => setCount(count + 1)}>{count}</div>
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(<App />)
