@@ -50,3 +50,7 @@ export const commitTextUpdatevalue = (textInstance: TextInstance, content: strin
 export const removeChild = (child: Instance | TextInstance, container: Container) => {
   container.removeChild(child)
 }
+
+export const insertChildToContainer = (child: Instance, container: Container, before: Instance) => {
+  container.insertBefore(child, before)
+}
