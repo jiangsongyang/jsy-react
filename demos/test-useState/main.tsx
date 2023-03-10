@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client'
 const App = () => {
   const [count, setCount] = useState(1)
 
-  window.setCount = setCount
+  ;(window as any).setCount = setCount
 
   return count === 3 ? <Child /> : <div>{count}</div>
 }
