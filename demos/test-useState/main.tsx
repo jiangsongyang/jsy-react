@@ -9,7 +9,24 @@ const App = () => {
       ? [<li key="1">1</li>, <li key="2">2</li>, <li key="3">3</li>]
       : [<li key="3">3</li>, <li key="2">2</li>, <li key="1">1</li>]
 
-  return <ul onClick={() => setCount(count + 1)}>{arr}</ul>
+  return (
+    <>
+      <div onClick={() => setCount(count + 1)}>
+        <>
+          <div>2</div>
+          <div>
+            <>{arr}</>
+          </div>
+        </>
+      </div>
+      <div>
+        <>
+          <div>5</div>
+          <div>6</div>
+        </>
+      </div>
+    </>
+  )
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(<App />)

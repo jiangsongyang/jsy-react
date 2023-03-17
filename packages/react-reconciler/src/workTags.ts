@@ -3,9 +3,11 @@ export type WorkTag =
   | typeof HostRoot
   | typeof HostComponent
   | typeof HostText
+  | typeof Fragment
 
 export const FunctionComponent = 0
 // 应用要挂载到的根节点
 export const HostRoot = 3
 export const HostComponent = 5
 export const HostText = 6
+export const Fragment = 7

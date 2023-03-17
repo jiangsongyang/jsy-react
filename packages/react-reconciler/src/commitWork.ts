@@ -113,21 +113,35 @@ const getHostSibling = (fiber: FiberNode) => {
   }
 }
 
+const recordHostChildrenToDelete = (childrenToDelete: FiberNode[], unmountFiber: FiberNode) => {
+  // 1. 找到第一个 root host 节点
+  const lastOne = childrenToDelete[childrenToDelete.length - 1]
+  if (!lastOne) {
+    childrenToDelete.push(unmountFiber)
+  } else {
+    let node = lastOne.sibling
+    while (node !== null) {
+      if (unmountFiber === node) {
+        childrenToDelete.push(node)
+      }
+      node = node.sibling
+    }
+  }
+
+  // 2. 每找到一个 host 阶段 判断这个节点是不是第一步找到的节点的兄弟节点
+}
+
 const commitDeletion = (childToDelete: FiberNode) => {
-  let rootHostNode: FiberNode | null = null
+  const rootChildrenToDelete: FiberNode[] = []
   // 递归子树
   commitNestedComponent(childToDelete, unmountFiber => {
     switch (unmountFiber.tag) {
       case HostComponent:
-        if (rootHostNode === null) {
-          rootHostNode = unmountFiber
-        }
+        recordHostChildrenToDelete(rootChildrenToDelete, unmountFiber)
         // todo 解绑 ref
         return
       case HostText:
-        if (rootHostNode === null) {
-          rootHostNode = unmountFiber
-        }
+        recordHostChildrenToDelete(rootChildrenToDelete, unmountFiber)
         return
       case FunctionComponent:
         // todo 解绑 ref useEffect unmount
@@ -139,9 +153,13 @@ const commitDeletion = (childToDelete: FiberNode) => {
     }
   })
   // 移除 DOM
-  if (rootHostNode !== null) {
+  if (rootChildrenToDelete.length) {
     const hostParent = getHostParent(childToDelete)
-    if (hostParent) removeChild((rootHostNode as FiberNode).stateNode, hostParent)
+    if (hostParent !== null) {
+      rootChildrenToDelete.forEach(node => {
+        removeChild(node.stateNode, hostParent)
+      })
+    }
   } else {
     if (__DEV__) {
       console.warn(`没有找到 rootHostNode`)

@@ -1,5 +1,6 @@
 import { REACT_ELEMENT_TYPE } from '@jsy-react/shared'
 import type { Key, Props, Ref, ReactElement as TReactElement, Type } from '@jsy-react/shared'
+import { REACT_FRAGMENT_TYPE } from 'shared/constants/react-symbols'
 
 export const ReactElement: (type: Type, key: Key, ref: Ref, props: Props) => TReactElement = (
   type: Type,
@@ -71,3 +72,5 @@ export const jsxDEV = (type: any, config: any) => {
 export const isValidElementFn = (object: any) => {
   return typeof object === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE
 }
+
+export const Fragment = REACT_FRAGMENT_TYPE

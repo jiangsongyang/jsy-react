@@ -1,6 +1,17 @@
-import { Props, REACT_ELEMENT_TYPE, ReactElement } from '@jsy-react/shared'
-import { FiberNode, createFiberFromElement, createWorkInProgress } from './fiber'
-import { HostText } from './workTags'
+import {
+  Key,
+  Props,
+  REACT_ELEMENT_TYPE,
+  REACT_FRAGMENT_TYPE,
+  ReactElement,
+} from '@jsy-react/shared'
+import {
+  FiberNode,
+  createFiberFromElement,
+  createFiberFromFragment,
+  createWorkInProgress,
+} from './fiber'
+import { Fragment, HostText } from './workTags'
 import { ChildDeletion, Placement } from './fiberFlags'
 
 type ExistingChildren = Map<string | number, FiberNode>
@@ -48,8 +59,14 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
         // 1. key 相同 type 相同 可复用
         if (element.$$typeof === REACT_ELEMENT_TYPE) {
           if (element.type === currentFiber.type) {
+            let props = element.props
+            // 如果是 fragment
+            if (element.type === REACT_FRAGMENT_TYPE) {
+              props = element.props.children
+            }
+
             // 如果 type 一样 可复用
-            const existing = useFiber(currentFiber, element.props)
+            const existing = useFiber(currentFiber, props)
             existing.return = returnFiber
             // 当前节点可复用 标记剩下的节点
             deleteRemainingChildren(returnFiber, currentFiber.sibling)
@@ -76,7 +93,12 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
     }
     // 如果都没有复用的
     // 就创建一个新的
-    const fiber = createFiberFromElement(element)
+    let fiber
+    if (element.type === REACT_FRAGMENT_TYPE) {
+      fiber = createFiberFromFragment(element.props.children, key)
+    } else {
+      fiber = createFiberFromElement(element)
+    }
     fiber.return = returnFiber
     return fiber
   }
@@ -127,6 +149,7 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
     // 1. 将 current 保存在 map 中
     const existingChildren: ExistingChildren = new Map()
     let current = currentFirstChild
+
     while (current !== null) {
       const keyToUse = current.key !== null ? current.key : current.index
       existingChildren.set(keyToUse, current)
@@ -198,6 +221,9 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
     if (typeof element === 'object' && element !== null) {
       switch (element.$$typeof) {
         case REACT_ELEMENT_TYPE:
+          if (element.type === REACT_FRAGMENT_TYPE) {
+            updateFragement(returnFiber, before, element, keyToUse, existingChildren)
+          }
           if (before) {
             // key 相同 type 相同 可复用
             if (before.type === element.type) {
@@ -210,7 +236,7 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
     }
     // TODO element 是数组
     if (Array.isArray(element) && __DEV__) {
-      console.warn(`暂未实现数组类型的 child`)
+      return updateFragement(returnFiber, before, element, keyToUse, existingChildren)
     }
     return null
   }
@@ -218,24 +244,35 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
   return function reconcileChildFibers(
     returnFiber: FiberNode,
     currentFiber: FiberNode | null,
-    newChild?: ReactElement
+    newChild?: any
   ) {
+    // 判断 fragment
+    const isUnkeyedTopLevelFragment =
+      typeof newChild === 'object' &&
+      newChild !== null &&
+      newChild.type === REACT_FRAGMENT_TYPE &&
+      newChild.key === null
+
+    if (isUnkeyedTopLevelFragment) {
+      newChild = newChild.props.children
+    }
+
     // 判断当前 fiber 的类型
     if (typeof newChild === 'object' && newChild !== null) {
+      // 多节点的情况
+      // ul -> li * 3
+      if (Array.isArray(newChild)) {
+        return reconcileChildrenArray(returnFiber, currentFiber, newChild)
+      }
       switch (newChild.$$typeof) {
         case REACT_ELEMENT_TYPE:
           return placeSingleChild(reconcileSingleElement(returnFiber, currentFiber, newChild))
 
         default:
           if (__DEV__) {
-            console.warn(`未实现的边界情况 ：`, newChild)
+            console.warn(`未实现的边界情况:`, newChild)
           }
           break
-      }
-      // 多节点的情况
-      // ul -> li * 3
-      if (Array.isArray(newChild)) {
-        return reconcileChildrenArray(returnFiber, currentFiber, newChild)
       }
     }
 
@@ -246,11 +283,11 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
 
     // 兜底的情况
     if (currentFiber) {
-      deleteChild(returnFiber, currentFiber)
+      deleteRemainingChildren(returnFiber, currentFiber)
     }
 
     if (__DEV__) {
-      console.warn(`未实现的边界情况 ：`, newChild)
+      console.warn(`未实现的边界情况:`, newChild)
     }
 
     return null
@@ -262,6 +299,24 @@ const useFiber = (fiber: FiberNode, pendingProps: Props) => {
   clone.index = 0
   clone.sibling = null
   return clone
+}
+
+const updateFragement = (
+  returnFiber: FiberNode,
+  current: FiberNode | undefined,
+  elements: any[],
+  key: Key,
+  existingChildren: ExistingChildren
+) => {
+  let fiber
+  if (!current || current.tag !== Fragment) {
+    fiber = createFiberFromFragment(elements, key)
+  } else {
+    existingChildren.delete(key)
+    fiber = useFiber(current, elements)
+  }
+  fiber.return = returnFiber
+  return fiber
 }
 
 export const reconcileChildFibers = childReconciler(true)

@@ -5,7 +5,7 @@ import { mountChildFibers, reconcileChildFibers } from './childFibers'
 import { FiberNode } from './fiber'
 import { renderWithHooks } from './fiberHooks'
 import { UpdateQueue, processUpdateQueue } from './updateQueue'
-import { FunctionComponent, HostComponent, HostRoot, HostText } from './workTags'
+import { Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from './workTags'
 
 export const beginWork = (workInProgress: FiberNode) => {
   // 返回比较完成的 子 fiberNode
@@ -18,6 +18,8 @@ export const beginWork = (workInProgress: FiberNode) => {
       return null
     case FunctionComponent:
       return updateFunctionComponent(workInProgress)
+    case Fragment:
+      return updateFragment(workInProgress)
     default:
       if (__DEV__) {
         console.warn(`beginWork 未实现的类型 : `, workInProgress.tag)
@@ -25,6 +27,14 @@ export const beginWork = (workInProgress: FiberNode) => {
       break
   }
   return null
+}
+
+const updateFragment = (workInProgress: FiberNode) => {
+  console.log(`updateFragment`, workInProgress)
+
+  const nextChildren = workInProgress.pendingProps
+  reconcileChildren(workInProgress, nextChildren)
+  return workInProgress.child
 }
 
 const updateFunctionComponent = (workInProgress: FiberNode) => {
