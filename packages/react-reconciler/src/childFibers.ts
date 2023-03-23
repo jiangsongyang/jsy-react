@@ -126,7 +126,9 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
     return fiber
   }
 
+  // 标记插入
   const placeSingleChild = (fiber: FiberNode) => {
+    __DEV__ && console.log(`标记插入`, fiber)
     // 需要追踪 && 首屏渲染
     if (shouldTrackEffects && fiber.alternate === null) {
       fiber.flags = Placement

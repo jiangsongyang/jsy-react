@@ -13,6 +13,7 @@ const prepareFreshStack = (root: FiberRootNode) => {
 }
 
 export const scheduleUpdateOnFiber = (fiber: FiberNode) => {
+  // 获取 fiberRootNode
   const root = markUpdateFromFiberToRoot(fiber)
 
   renderRoot(root)
@@ -36,8 +37,7 @@ const markUpdateFromFiberToRoot = (fiber: FiberNode) => {
 
 // 渲染阶段的入口方法
 export const renderRoot = (root: FiberRootNode) => {
-  // 初始化
-  // 让 workInProgress 指向 第一个 fiberNode 也就是 FiberRootNode
+  // 根据 fiberRootNode 的 fiber 创建 workInProgress
   prepareFreshStack(root)
 
   do {
