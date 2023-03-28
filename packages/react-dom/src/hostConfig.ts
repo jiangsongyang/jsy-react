@@ -54,3 +54,10 @@ export const removeChild = (child: Instance | TextInstance, container: Container
 export const insertChildToContainer = (child: Instance, container: Container, before: Instance) => {
   container.insertBefore(child, before)
 }
+
+export const scheduleMicroTask =
+  typeof queueMicrotask === 'function'
+    ? queueMicrotask
+    : typeof Promise === 'function'
+    ? (callback: (...args: any) => void) => Promise.resolve().then(callback)
+    : setTimeout
