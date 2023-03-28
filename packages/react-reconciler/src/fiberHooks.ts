@@ -108,7 +108,7 @@ const dispatchSetState = <State>(
   const lane = requestUpdateLane()
   const update = createUpdate(action, lane)
   enqueueUpdate(updateQueue, update)
-  scheduleUpdateOnFiber(fiber)
+  scheduleUpdateOnFiber(fiber, lane)
 }
 
 const mountWorkInProgressHook = () => {

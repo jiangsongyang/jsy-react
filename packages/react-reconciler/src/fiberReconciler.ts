@@ -24,7 +24,7 @@ export const updateContainer = (element: ReactElement | null, root: FiberRootNod
   enqueueUpdate(hostRootFiber.updateQueue as UpdateQueue<ReactElement | null>, update)
 
   // 开始给 fiber 节点调度更新任务
-  scheduleUpdateOnFiber(hostRootFiber)
+  scheduleUpdateOnFiber(hostRootFiber, lane)
 
   return element
 }
