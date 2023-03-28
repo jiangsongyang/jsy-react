@@ -2,6 +2,8 @@ import type { Key, Props, ReactElement } from '@jsy-react/shared'
 import type { Container } from 'hostConfig'
 import { Fragment, FunctionComponent, HostComponent, WorkTag } from './workTags'
 import { Flags, NoFlags } from './fiberFlags'
+import { NoLanes } from './fiberLanes'
+import type { Lane, Lanes } from './fiberLanes'
 
 export class FiberNode {
   tag: WorkTag
@@ -66,12 +68,16 @@ export class FiberRootNode {
   container: Container
   current: FiberNode
   finishedWork: FiberNode | null
+  pendingLanes: Lanes
+  finishedLane: Lane
 
   constructor(container: Container, hostRootFiber: FiberNode) {
     this.container = container
     this.current = hostRootFiber
     hostRootFiber.stateNode = this
     this.finishedWork = null
+    this.pendingLanes = NoLanes
+    this.finishedLane = NoLanes
   }
 }
 

@@ -1,8 +1,10 @@
 import type { Action } from '@jsy-react/shared'
 import { Dispatch } from 'react/src/currentDispatcher'
+import type { Lane } from './fiberLanes'
 
 export interface Update<State> {
   action: Action<State>
+  lane: Lane
   next: Update<any> | null
 }
 
@@ -14,9 +16,10 @@ export interface UpdateQueue<State> {
 }
 
 /** 创建更新 */
-export const createUpdate = <State>(action: Action<State>) => {
+export const createUpdate = <State>(action: Action<State>, lane: Lane) => {
   return {
     action,
+    lane,
     next: null,
   }
 }
