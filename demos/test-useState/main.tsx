@@ -12,18 +12,7 @@ const App = () => {
   return (
     <>
       <div onClick={() => setCount(count + 1)}>
-        <>
-          <div>2</div>
-          <div>
-            <>{arr}</>
-          </div>
-        </>
-      </div>
-      <div>
-        <>
-          <div>5</div>
-          <div>6</div>
-        </>
+        <>{arr}</>
       </div>
     </>
   )

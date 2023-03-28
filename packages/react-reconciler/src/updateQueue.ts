@@ -3,6 +3,7 @@ import { Dispatch } from 'react/src/currentDispatcher'
 
 export interface Update<State> {
   action: Action<State>
+  next: Update<any> | null
 }
 
 export interface UpdateQueue<State> {
@@ -16,6 +17,7 @@ export interface UpdateQueue<State> {
 export const createUpdate = <State>(action: Action<State>) => {
   return {
     action,
+    next: null,
   }
 }
 
@@ -31,6 +33,24 @@ export const createUpdateQueue = <State>() => {
 
 /** 入队方法 */
 export const enqueueUpdate = <State>(updateQueue: UpdateQueue<State>, update: Update<State>) => {
+  const pending = updateQueue.shared.pending
+  if (pending === null) {
+    // 当前 fiber 上没有更新任务
+    // 构建 环状链表
+    // pending = a -> a
+    update.next = update
+  } else {
+    // 当前 fiber 上有更新任务
+    // 构建 环状链表
+
+    // b.next = a.next
+    update.next = pending.next
+    // a.next = b
+    pending.next = update
+  }
+
+  // pending 指向最后一个 update
+  // pending.next 指向第一个 update
   updateQueue.shared.pending = update
 }
 
