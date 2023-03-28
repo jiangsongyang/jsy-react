@@ -8,18 +8,21 @@ import {
   NoLane,
   SyncLane,
   getHeightestPriorityLane,
-  mergeLane,
-  requestUpdateLane,
+  markRootFinished,
+  mergeLanes,
 } from './fiberLanes'
 import type { Lane } from './fiberLanes'
 import { HostRoot } from './workTags'
 import { flushSyncCallbacks, scheduleSyncCallback } from './syncTaskQueue'
 
 let workInProgress: FiberNode | null = null
+// 本次更新的 lane 是什么
+let workInProgressRenderLane: Lane = NoLane
 
 // 找到初始化的节点
-const prepareFreshStack = (root: FiberRootNode) => {
+const prepareFreshStack = (root: FiberRootNode, lane: Lane) => {
   workInProgress = createWorkInProgress(root.current, {})
+  workInProgressRenderLane = lane
 }
 
 export const scheduleUpdateOnFiber = (fiber: FiberNode, lane: Lane) => {
@@ -29,29 +32,26 @@ export const scheduleUpdateOnFiber = (fiber: FiberNode, lane: Lane) => {
   ensureRootIsScheduled(root)
 }
 
-// 调度阶段的入口
-const ensureRootIsScheduled = (root: FiberRootNode) => {
-  // 获取最高优先级的 lane
+function ensureRootIsScheduled(root: FiberRootNode) {
   const updateLane = getHeightestPriorityLane(root.pendingLanes)
   if (updateLane === NoLane) {
     return
   }
   if (updateLane === SyncLane) {
-    // 同步优先级
-    // 微任务调度
+    // 同步优先级 用微任务调度
     if (__DEV__) {
-      console.log(`在微任务中调度 , 优先级是 : ${updateLane}`)
+      console.log('在微任务中调度，优先级：', updateLane)
     }
+    // [performSyncWorkOnRoot, performSyncWorkOnRoot, performSyncWorkOnRoot]
     scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root, updateLane))
     scheduleMicroTask(flushSyncCallbacks)
   } else {
-    // 其他优先级
-    // 宏任务调度
+    // 其他优先级 用宏任务调度
   }
 }
 
-const markRootUpdated = (root: FiberRootNode, lane: Lane) => {
-  root.pendingLanes = mergeLane(root.pendingLanes, lane)
+function markRootUpdated(root: FiberRootNode, lane: Lane) {
+  root.pendingLanes = mergeLanes(root.pendingLanes, lane)
 }
 
 const markUpdateFromFiberToRoot = (fiber: FiberNode) => {
@@ -71,20 +71,21 @@ const markUpdateFromFiberToRoot = (fiber: FiberNode) => {
 }
 
 // 渲染阶段的入口方法
-export const performSyncWorkOnRoot = (
-  root: FiberRootNode
-  // lane: Lane
-) => {
-  const nextLanes = requestUpdateLane()
-  if (nextLanes !== SyncLane) {
-    // 其他比 SyncLane 更低的优先级
+export const performSyncWorkOnRoot = (root: FiberRootNode, lane: Lane) => {
+  const nextLane = getHeightestPriorityLane(root.pendingLanes)
+
+  if (nextLane !== SyncLane) {
+    // 其他比SyncLane低的优先级
     // NoLane
     ensureRootIsScheduled(root)
     return
   }
 
-  // 根据 fiberRootNode 的 fiber 创建 workInProgress
-  prepareFreshStack(root)
+  if (__DEV__) {
+    console.warn('render阶段开始')
+  }
+  // 初始化
+  prepareFreshStack(root, lane)
 
   do {
     try {
@@ -97,12 +98,16 @@ export const performSyncWorkOnRoot = (
       workInProgress = null
     }
   } while (true)
-
   const finishedWork = root.current.alternate
-  // 保存工作结果
   root.finishedWork = finishedWork
+  root.finishedLane = lane
+  workInProgressRenderLane = NoLane
+
+  // 本次更新的 lane
+  root.finishedLane = lane
 
   // workinprogress fiberNode树 树中的 flags
+
   commitRoot(root)
 }
 /**
@@ -119,11 +124,20 @@ const commitRoot = (root: FiberRootNode) => {
   }
 
   if (__DEV__) {
-    console.log(`commit阶段开始 : `, finishedWork)
+    console.warn(`commit阶段开始 : `, finishedWork)
+  }
+
+  const lane = root.finishedLane
+
+  if (lane === NoLane) {
+    console.error(`finished lane 不应该是 NoLane`)
   }
 
   // 重置
   root.finishedWork = null
+  root.finishedLane = NoLane
+
+  markRootFinished(root, lane)
 
   // 判断是否存在3个子阶段需要执行的操作
   // root flags , root subtreeFlags
@@ -153,7 +167,7 @@ const workLoop = () => {
 }
 
 const performUnitOfWork = (fiber: FiberNode) => {
-  const next = beginWork(fiber)
+  const next = beginWork(fiber, workInProgressRenderLane)
   fiber.memoizedProps = fiber.pendingProps
   // 递归到最深层
   // 开始归

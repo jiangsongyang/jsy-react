@@ -4,20 +4,21 @@ import { ReactElement } from '@jsy-react/shared'
 import { mountChildFibers, reconcileChildFibers } from './childFibers'
 import { FiberNode } from './fiber'
 import { renderWithHooks } from './fiberHooks'
+import type { Lane } from './fiberLanes'
 import { UpdateQueue, processUpdateQueue } from './updateQueue'
 import { Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from './workTags'
 
-export const beginWork = (workInProgress: FiberNode) => {
+export const beginWork = (workInProgress: FiberNode, renderLean: Lane) => {
   // 返回比较完成的 子 fiberNode
   switch (workInProgress.tag) {
     case HostRoot:
-      return updateHostRoot(workInProgress)
+      return updateHostRoot(workInProgress, renderLean)
     case HostComponent:
       return updateHostComponent(workInProgress)
     case HostText:
       return null
     case FunctionComponent:
-      return updateFunctionComponent(workInProgress)
+      return updateFunctionComponent(workInProgress, renderLean)
     case Fragment:
       return updateFragment(workInProgress)
     default:
@@ -37,16 +38,17 @@ const updateFragment = (workInProgress: FiberNode) => {
   return workInProgress.child
 }
 
-const updateFunctionComponent = (workInProgress: FiberNode) => {
+const updateFunctionComponent = (workInProgress: FiberNode, renderLean: Lane) => {
   console.log(`updateFunctionComponent`, workInProgress)
 
-  const nextChildren = renderWithHooks(workInProgress)
+  const nextChildren = renderWithHooks(workInProgress, renderLean)
   reconcileChildren(workInProgress, nextChildren)
   return workInProgress.child
 }
 
 // 计算状态的最新值
-const updateHostRoot = (workInProgress: FiberNode) => {
+
+const updateHostRoot = (workInProgress: FiberNode, renderLean: Lane) => {
   console.log(`updateHostRoot`, workInProgress)
 
   const baseState = workInProgress.memoizedState
@@ -55,7 +57,7 @@ const updateHostRoot = (workInProgress: FiberNode) => {
 
   updateQueue.shared.pending = null
 
-  const { memoizedState } = processUpdateQueue(baseState, pending)
+  const { memoizedState } = processUpdateQueue(baseState, pending, renderLean)
   workInProgress.memoizedState = memoizedState
 
   const nextChildren = workInProgress.memoizedState

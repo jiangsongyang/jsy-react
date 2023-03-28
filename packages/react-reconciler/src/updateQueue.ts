@@ -1,6 +1,6 @@
-import type { Action } from '@jsy-react/shared'
 import { Dispatch } from 'react/src/currentDispatcher'
-import type { Lane } from './fiberLanes'
+import { Action } from 'shared'
+import { Lane } from './fiberLanes'
 
 export interface Update<State> {
   action: Action<State>
@@ -15,8 +15,7 @@ export interface UpdateQueue<State> {
   dispatch: Dispatch<State> | null
 }
 
-/** 创建更新 */
-export const createUpdate = <State>(action: Action<State>, lane: Lane) => {
+export const createUpdate = <State>(action: Action<State>, lane: Lane): Update<State> => {
   return {
     action,
     lane,
@@ -24,7 +23,6 @@ export const createUpdate = <State>(action: Action<State>, lane: Lane) => {
   }
 }
 
-/** 创建更新队列 */
 export const createUpdateQueue = <State>() => {
   return {
     shared: {
@@ -34,45 +32,52 @@ export const createUpdateQueue = <State>() => {
   } as UpdateQueue<State>
 }
 
-/** 入队方法 */
 export const enqueueUpdate = <State>(updateQueue: UpdateQueue<State>, update: Update<State>) => {
   const pending = updateQueue.shared.pending
   if (pending === null) {
-    // 当前 fiber 上没有更新任务
-    // 构建 环状链表
     // pending = a -> a
     update.next = update
   } else {
-    // 当前 fiber 上有更新任务
-    // 构建 环状链表
-
-    // b.next = a.next
+    // pending = b -> a -> b
+    // pending = c -> a -> b -> c
     update.next = pending.next
-    // a.next = b
     pending.next = update
   }
-
-  // pending 指向最后一个 update
-  // pending.next 指向第一个 update
   updateQueue.shared.pending = update
 }
 
-/** 消费更新的方法 */
 export const processUpdateQueue = <State>(
   baseState: State,
-  pendingUpdate: Update<State>
+  pendingUpdate: Update<State> | null,
+  renderLane: Lane
 ): { memoizedState: State } => {
-  const result: ReturnType<typeof processUpdateQueue<State>> = { memoizedState: baseState }
-  if (pendingUpdate !== null) {
-    // baseState 1 update 2 -> memoizedState 2
-    // baseState 1 update (x) => 2x -> memoizedState 2
-    const action = pendingUpdate.action
-    if (action instanceof Function) {
-      result.memoizedState = action(baseState)
-    } else {
-      result.memoizedState = action
-    }
+  const result: ReturnType<typeof processUpdateQueue<State>> = {
+    memoizedState: baseState,
   }
 
+  if (pendingUpdate !== null) {
+    // 第一个update
+    const first = pendingUpdate.next
+    let pending = pendingUpdate.next as Update<any>
+    do {
+      const updateLane = pending.lane
+      if (updateLane === renderLane) {
+        const action = pending.action
+        if (action instanceof Function) {
+          // baseState 1 update (x) => 4x -> memoizedState 4
+          baseState = action(baseState)
+        } else {
+          // baseState 1 update 2 -> memoizedState 2
+          baseState = action
+        }
+      } else {
+        if (__DEV__) {
+          console.error('不应该进入updateLane !== renderLane逻辑')
+        }
+      }
+      pending = pending.next as Update<any>
+    } while (pending !== first)
+  }
+  result.memoizedState = baseState
   return result
 }

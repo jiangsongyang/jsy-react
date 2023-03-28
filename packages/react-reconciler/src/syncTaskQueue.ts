@@ -1,9 +1,7 @@
-type Callback = (...args: any) => void
+let syncQueue: ((...args: any) => void)[] | null = null
+let isFlushingSyncQueue = false
 
-let isFulshingSyncQueue = false
-let syncQueue: Callback[] | null = null
-
-export const scheduleSyncCallback = (callback: Callback) => {
+export function scheduleSyncCallback(callback: (...args: any) => void) {
   if (syncQueue === null) {
     syncQueue = [callback]
   } else {
@@ -11,19 +9,18 @@ export const scheduleSyncCallback = (callback: Callback) => {
   }
 }
 
-export const flushSyncCallbacks = () => {
-  if (!isFulshingSyncQueue && syncQueue) {
-    isFulshingSyncQueue = true
+export function flushSyncCallbacks() {
+  if (!isFlushingSyncQueue && syncQueue) {
+    isFlushingSyncQueue = true
     try {
-      syncQueue.forEach(callback => {
-        callback()
-      })
-    } catch (err) {
+      syncQueue.forEach(callback => callback())
+    } catch (e) {
       if (__DEV__) {
-        console.error('flushSyncQueue 报错', err)
+        console.error('flushSyncCallbacks报错', e)
       }
     } finally {
-      isFulshingSyncQueue = false
+      isFlushingSyncQueue = false
+      syncQueue = null
     }
   }
 }
