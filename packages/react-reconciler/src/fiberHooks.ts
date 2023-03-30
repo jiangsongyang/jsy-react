@@ -96,7 +96,7 @@ const updateState: <State>() => [State, Dispatch<State>] = <State>() => {
   // 计算新 state 的逻辑
   const queue = hook.updateQueue as UpdateQueue<State>
   const pending = queue.shared.pending
-  // 重置 已经被消费完了
+  // 重置
   queue.shared.pending = null
 
   if (pending !== null) {
