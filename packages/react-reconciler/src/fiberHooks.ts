@@ -43,6 +43,8 @@ export const renderWithHooks = (workInProgress: FiberNode, lane: Lane) => {
   // 重置
   workInProgress.memoizedState = null
   renderLane = lane
+  // 重置effect
+  workInProgress.updateQueue = null
 
   const current = workInProgress.alternate
 
@@ -200,7 +202,7 @@ type EffectCallback = () => void
 
 type EffectDeps = any[] | null
 
-interface Effect {
+export interface Effect {
   tag: number
   create: EffectCallback | void
   destroy: EffectCallback | void
@@ -216,6 +218,46 @@ const mountEffect = (create: EffectCallback | void, deps?: EffectDeps) => {
   // mount 时 当前 fiber 标记 需要处理 effect
   ;(currentRenderingFiber as FiberNode).flags |= PassiveEffect
   hook.memoizedState = pushEffect(Passive | HookHasEffect, create, undefined, nextDeps)
+}
+
+const updateEffect = (create: EffectCallback | void, deps?: EffectDeps) => {
+  const hook = updateWorkInProgressHook()
+
+  const nextDeps = deps === undefined ? null : deps
+  let destory: EffectCallback | void
+
+  if (currentHook !== null) {
+    const prevEffect = currentHook.memoizedState
+    destory = prevEffect.destroy
+    if (deps !== null) {
+      // 浅比较
+      const prevDeps = prevEffect.deps
+      if (areHookInputsEqual(nextDeps, prevDeps)) {
+        // 依赖项没有变化
+        hook.memoizedState = pushEffect(Passive, create, destory, nextDeps)
+      } else {
+        // 依赖项变化
+        currentRenderingFiber!.flags |= PassiveEffect
+        hook.memoizedState = pushEffect(Passive | HookHasEffect, create, destory, nextDeps)
+      }
+    }
+  }
+}
+
+const areHookInputsEqual = (nextDeps: EffectDeps, prevDeps: EffectDeps) => {
+  if (prevDeps === null || nextDeps === null) {
+    return false
+  }
+
+  for (let i = 0; i < prevDeps.length && i < nextDeps.length; i++) {
+    if (Object.is(nextDeps[i], prevDeps[i])) {
+      continue
+    } else {
+      return false
+    }
+  }
+
+  return true
 }
 
 const pushEffect = (
@@ -257,7 +299,7 @@ const pushEffect = (
   return effect
 }
 
-interface FCUpdateQueue<State> extends UpdateQueue<State> {
+export interface FCUpdateQueue<State> extends UpdateQueue<State> {
   lastEffect: Effect | null
 }
 
@@ -266,8 +308,6 @@ const createFCUpdateQueue = <State>() => {
   updateQueue.lastEffect = null
   return updateQueue
 }
-
-const updateEffect = () => {}
 
 const hooksDispatcherOnMount: Dispatcher = {
   useState: mountState,
