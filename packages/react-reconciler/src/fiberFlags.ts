@@ -16,12 +16,13 @@ export const DidCapture = /*                   */ 0b00000000000000000010000000
 export const ForceClientRender = /*            */ 0b00000000000000000100000000
 export const Ref = /*                          */ 0b00000000000000001000000000
 export const Snapshot = /*                     */ 0b00000000000000010000000000
-export const Passive = /*                      */ 0b00000000000000100000000000
+export const PassiveEffect = /*                */ 0b00000000000000100000000000
 export const Hydrating = /*                    */ 0b00000000000001000000000000
 export const Visibility = /*                   */ 0b00000000000010000000000000
 export const StoreConsistency = /*             */ 0b00000000000100000000000000
 
-export const LifecycleEffectMask = Passive | Update | Callback | Ref | Snapshot | StoreConsistency
+export const LifecycleEffectMask =
+  PassiveEffect | Update | Callback | Ref | Snapshot | StoreConsistency
 
 // Union of all commit flags (flags with the lifetime of a particular commit)
 export const HostEffectMask = /*               */ 0b00000000000111111111111111
@@ -54,7 +55,7 @@ export const MutationMask =
 export const LayoutMask = Update | Callback | Ref | Visibility
 
 // TODO: Split into PassiveMountMask and PassiveUnmountMask
-export const PassiveMask = Passive | ChildDeletion
+export const PassiveMask = PassiveEffect | ChildDeletion
 
 // Union of tags that don't get reset on clones.
 // This allows certain concepts to persist without recalculating them,

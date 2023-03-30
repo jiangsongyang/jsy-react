@@ -11,6 +11,8 @@ import {
 } from './updateQueue'
 import { scheduleUpdateOnFiber } from './workLoop'
 import { Lane, NoLane, requestUpdateLane } from './fiberLanes'
+import { Flags, PassiveEffect } from './fiberFlags'
+import { HookHasEffect, Passive } from './hookEffectTags'
 
 const { currentDispatcher } = internals
 
@@ -65,7 +67,9 @@ export const renderWithHooks = (workInProgress: FiberNode, lane: Lane) => {
 
   return childen
 }
-
+/**
+ * ====================== state hook ======================
+ */
 const mountState = <State>(initialState: () => State | State) => {
   // 找到当前 useState 对应的 hook 数据
   const hook = mountWorkInProgressHook()
@@ -189,12 +193,88 @@ const updateWorkInProgressHook = () => {
   return workInProgressHook
 }
 
+/**
+ * ====================== effect hook ======================
+ */
+type EffectCallback = () => void
+
+type EffectDeps = any[] | null
+
+interface Effect {
+  tag: number
+  create: EffectCallback | void
+  destroy: EffectCallback | void
+  deps: EffectDeps
+  next: Effect | null
+}
+
+const mountEffect = (create: EffectCallback | void, deps?: EffectDeps) => {
+  const hook = mountWorkInProgressHook()
+
+  const nextDeps = deps === undefined ? null : deps
+
+  // mount 时 当前 fiber 标记 需要处理 effect
+  ;(currentRenderingFiber as FiberNode).flags |= PassiveEffect
+  hook.memoizedState = pushEffect(Passive | HookHasEffect, create, undefined, nextDeps)
+}
+
+const pushEffect = (
+  hookFlags: Flags,
+  create: EffectCallback | void,
+  destroy: EffectCallback | void,
+  deps: EffectDeps
+) => {
+  const effect: Effect = {
+    tag: hookFlags,
+    create,
+    destroy,
+    deps,
+    next: null,
+  }
+  const fiber = currentRenderingFiber as FiberNode
+
+  const updateQueue = fiber.updateQueue as FCUpdateQueue<any>
+  // 当前 fiber 没有 updateQueue
+  if (updateQueue === null) {
+    const updateQueue = createFCUpdateQueue()
+    fiber.updateQueue = updateQueue
+    effect.next = effect
+    updateQueue.lastEffect = effect
+  } else {
+    // 插入 effect
+    const lastEffect = updateQueue.lastEffect
+    if (lastEffect === null) {
+      effect.next = effect
+      updateQueue.lastEffect = effect
+    } else {
+      const firstEffect = lastEffect.next
+      lastEffect.next = effect
+      effect.next = firstEffect
+      updateQueue.lastEffect = effect
+    }
+  }
+
+  return effect
+}
+
+interface FCUpdateQueue<State> extends UpdateQueue<State> {
+  lastEffect: Effect | null
+}
+
+const createFCUpdateQueue = <State>() => {
+  const updateQueue = createUpdateQueue<State>() as FCUpdateQueue<State>
+  updateQueue.lastEffect = null
+  return updateQueue
+}
+
+const updateEffect = () => {}
+
 const hooksDispatcherOnMount: Dispatcher = {
   useState: mountState,
-  useEffect: () => {},
+  useEffect: mountEffect,
 }
 
 const hooksDispatcherOnUpdate: Dispatcher = {
   useState: updateState,
-  useEffect: () => {},
+  useEffect: updateEffect,
 }
