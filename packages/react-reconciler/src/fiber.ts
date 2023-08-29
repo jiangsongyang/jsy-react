@@ -12,6 +12,7 @@ export class FiberNode {
   stateNode: any
   type: any
 
+  // 构成树结构
   return: FiberNode | null
   sibling: FiberNode | null
   child: FiberNode | null
@@ -25,6 +26,7 @@ export class FiberNode {
   memoizedProps: Props | null
   // 指向一个 fc 的 hook 链表的第 0 个
   memoizedState: any
+
   updateQueue: unknown
 
   alternate: FiberNode | null

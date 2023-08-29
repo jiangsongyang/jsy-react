@@ -31,6 +31,7 @@ let workInProgressRenderLane: Lane = NoLane
 
 let rootDoesHasPassiveEffects: boolean = false
 
+// 初始化工作
 // 找到初始化的节点
 const prepareFreshStack = (root: FiberRootNode, lane: Lane) => {
   workInProgress = createWorkInProgress(root.current, {})
@@ -54,7 +55,6 @@ function ensureRootIsScheduled(root: FiberRootNode) {
     if (__DEV__) {
       console.log('在微任务中调度，优先级：', updateLane)
     }
-    // [performSyncWorkOnRoot, performSyncWorkOnRoot, performSyncWorkOnRoot]
     scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root, updateLane))
     scheduleMicroTask(flushSyncCallbacks)
   } else {

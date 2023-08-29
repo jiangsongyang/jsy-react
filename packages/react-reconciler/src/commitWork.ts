@@ -154,12 +154,12 @@ const commitPlacement = (finishedWork: FiberNode) => {
     console.warn(`执行 placement 操作 : `, finishedWork)
   }
   // parent DOM
-  const parentHost = getHostParent(finishedWork)
+  const hostParent = getHostParent(finishedWork)
   // host sibling
   const sibling = getHostSibling(finishedWork)
   // 找 finishedWork 中的 DOM
-  if (parentHost) {
-    insertOrAppendPlacementNodeIntoContainer(finishedWork, parentHost, sibling)
+  if (hostParent) {
+    insertOrAppendPlacementNodeIntoContainer(finishedWork, hostParent, sibling)
   }
 }
 

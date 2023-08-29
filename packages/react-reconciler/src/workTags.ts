@@ -6,8 +6,11 @@ export type WorkTag =
   | typeof Fragment
 
 export const FunctionComponent = 0
-// 应用要挂载到的根节点
+// reactDom.createRoot 对应的 fiber
 export const HostRoot = 3
+// <div> <span>
 export const HostComponent = 5
+// 宿主文本节点
 export const HostText = 6
+// <></>
 export const Fragment = 7
