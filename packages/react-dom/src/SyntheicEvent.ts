@@ -1,4 +1,10 @@
 import { Container } from 'hostConfig'
+import {
+  unstable_ImmediatePriority,
+  unstable_NormalPriority,
+  unstable_UserBlockingPriority,
+  unstable_runWithPriority,
+} from 'scheduler'
 import { Props } from 'shared'
 
 export const ELEMENT_PROPS_KEY = '__ELEMENT_PROPS_KEY__'
@@ -108,9 +114,24 @@ const createSyntheticEvent = (event: Event) => {
 const triggerEventFlow = (paths: EventCallback[], se: SyntheicEvent) => {
   for (let i = 0; i < paths.length; i++) {
     const callback = paths[i]
-    callback(se)
+    unstable_runWithPriority(eventTypeToSchedulerPriority(se.type), () => {
+      callback(se)
+    })
     if (se.__stopPropagation) {
       break
     }
+  }
+}
+
+export const eventTypeToSchedulerPriority = (eventType: string) => {
+  switch (eventType) {
+    case 'click':
+    case 'keydown':
+    case 'keyup':
+      return unstable_ImmediatePriority
+    case 'scroll':
+      return unstable_UserBlockingPriority
+    default:
+      return unstable_NormalPriority
   }
 }
