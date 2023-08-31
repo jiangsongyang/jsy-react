@@ -1,8 +1,9 @@
 import type { Key, Props, ReactElement } from '@jsy-react/shared'
 import type { Container } from 'hostConfig'
+import { CallbackNode } from 'scheduler'
 import { Fragment, FunctionComponent, HostComponent, WorkTag } from './workTags'
 import { Flags, NoFlags } from './fiberFlags'
-import { NoLanes } from './fiberLanes'
+import { NoLane, NoLanes } from './fiberLanes'
 import type { Lane, Lanes } from './fiberLanes'
 import { Effect } from './fiberHooks'
 
@@ -80,6 +81,9 @@ export class FiberRootNode {
   finishedLane: Lane
   pendingPassiveEffects: PendingPassiveEffects
 
+  callbackNode: CallbackNode | null
+  callbackPriority: Lane
+
   constructor(container: Container, hostRootFiber: FiberNode) {
     this.container = container
     this.current = hostRootFiber
@@ -87,6 +91,9 @@ export class FiberRootNode {
     this.finishedWork = null
     this.pendingLanes = NoLanes
     this.finishedLane = NoLanes
+
+    this.callbackNode = null
+    this.callbackPriority = NoLane
 
     this.pendingPassiveEffects = {
       unmount: [],
