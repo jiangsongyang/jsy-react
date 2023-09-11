@@ -128,7 +128,6 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
 
   // 标记插入
   const placeSingleChild = (fiber: FiberNode) => {
-    __DEV__ && console.log(`标记插入`, fiber)
     // 需要追踪 && 首屏渲染
     if (shouldTrackEffects && fiber.alternate === null) {
       fiber.flags = Placement
@@ -248,50 +247,47 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
     currentFiber: FiberNode | null,
     newChild?: any
   ) {
-    // 判断 fragment
+    // 判断Fragment
     const isUnkeyedTopLevelFragment =
       typeof newChild === 'object' &&
       newChild !== null &&
       newChild.type === REACT_FRAGMENT_TYPE &&
       newChild.key === null
-
     if (isUnkeyedTopLevelFragment) {
       newChild = newChild.props.children
     }
 
-    // 判断当前 fiber 的类型
+    // 判断当前fiber的类型
     if (typeof newChild === 'object' && newChild !== null) {
-      // 多节点的情况
-      // ul -> li * 3
+      // 多节点的情况 ul> li*3
       if (Array.isArray(newChild)) {
         return reconcileChildrenArray(returnFiber, currentFiber, newChild)
       }
+
       switch (newChild.$$typeof) {
         case REACT_ELEMENT_TYPE:
           return placeSingleChild(reconcileSingleElement(returnFiber, currentFiber, newChild))
-
         default:
           if (__DEV__) {
-            console.warn(`未实现的边界情况:`, newChild)
+            console.warn('未实现的reconcile类型', newChild)
           }
           break
       }
     }
 
-    // 文本节点
+    // HostText
     if (typeof newChild === 'string' || typeof newChild === 'number') {
       return placeSingleChild(reconcileSingleTextNode(returnFiber, currentFiber, newChild))
     }
 
-    // 兜底的情况
-    if (currentFiber) {
+    if (currentFiber !== null) {
+      // 兜底删除
       deleteRemainingChildren(returnFiber, currentFiber)
     }
 
     if (__DEV__) {
-      console.warn(`未实现的边界情况:`, newChild)
+      console.warn('未实现的reconcile类型', newChild)
     }
-
     return null
   }
 }

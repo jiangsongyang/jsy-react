@@ -39,8 +39,6 @@ const updateFragment = (workInProgress: FiberNode) => {
 }
 
 const updateFunctionComponent = (workInProgress: FiberNode, renderLean: Lane) => {
-  console.log(`updateFunctionComponent`, workInProgress)
-
   const nextChildren = renderWithHooks(workInProgress, renderLean)
   reconcileChildren(workInProgress, nextChildren)
   return workInProgress.child
@@ -66,8 +64,6 @@ const updateHostRoot = (workInProgress: FiberNode, renderLean: Lane) => {
 }
 
 const updateHostComponent = (workInProgress: FiberNode) => {
-  console.log(`updateHostComponent`, workInProgress)
-
   const nextProps = workInProgress.pendingProps
   const nextChildren = nextProps.children
   reconcileChildren(workInProgress, nextChildren)

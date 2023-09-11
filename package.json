@@ -12,7 +12,7 @@
     "install:commit-msg-lint": "npx husky add .husky/commit-msg \"node scripts/commit-message-lint/commit-msg.mjs $1\"",
     "install:pre-commit-lint": "npx husky add .husky/pre-commit \"npx lint-staged $1\"",
     "<!-- dev -->": "",
-    "dev:demo": "vite serve demos/test-concurrent --config ./scripts/vite/vite.config.js --force",
+    "dev:demo": "vite serve demos/test-useTransition --config ./scripts/vite/vite.config.js --force",
     "<!-- build -->": "",
     "build:dev": "rimraf dist && rollup --bundleConfigAsCjs --config scripts/rollup/dev.config.js",
     "<!-- test -->": "",

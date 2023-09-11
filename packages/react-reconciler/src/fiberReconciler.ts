@@ -1,4 +1,5 @@
 import { Container } from 'hostConfig'
+import { unstable_ImmediatePriority, unstable_runWithPriority } from 'scheduler'
 import type { ReactElement } from '@jsy-react/shared'
 import { FiberNode, FiberRootNode } from './fiber'
 import { UpdateQueue, createUpdate, createUpdateQueue, enqueueUpdate } from './updateQueue'
@@ -16,15 +17,13 @@ export const createContainer = (container: Container) => {
 }
 
 export const updateContainer = (element: ReactElement | null, root: FiberRootNode) => {
-  const hostRootFiber = root.current
-  const lane = requestUpdateLane()
-  // 创建一个更新任务 拿到需要更新的 jsx
-  const update = createUpdate<ReactElement | null>(element, lane)
-
-  enqueueUpdate(hostRootFiber.updateQueue as UpdateQueue<ReactElement | null>, update)
-
-  // 开始给 fiber 节点调度更新任务
-  scheduleUpdateOnFiber(hostRootFiber, lane)
-
+  // 首屏渲染 同步优先级更新
+  unstable_runWithPriority(unstable_ImmediatePriority, () => {
+    const hostRootFiber = root.current
+    const lane = requestUpdateLane()
+    const update = createUpdate<ReactElement | null>(element, lane)
+    enqueueUpdate(hostRootFiber.updateQueue as UpdateQueue<ReactElement | null>, update)
+    scheduleUpdateOnFiber(hostRootFiber, lane)
+  })
   return element
 }
