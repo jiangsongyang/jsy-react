@@ -10,6 +10,7 @@ import {
   commitHookEffectListCreate,
   commitHookEffectListDestory,
   commitHookEffectListUnmount,
+  commitLayoutEffects,
   commitMutationEffects,
 } from './commitWork'
 import { completeWork } from './completeWork'
@@ -281,6 +282,7 @@ const commitRoot = (root: FiberRootNode) => {
     // 更换双缓存
     root.current = finishedWork
     // 3. layout
+    commitLayoutEffects(finishedWork, root)
   } else {
     // 更换双缓存
     root.current = finishedWork

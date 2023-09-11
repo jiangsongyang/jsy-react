@@ -10,11 +10,13 @@ import { FiberNode, FiberRootNode, PendingPassiveEffects } from './fiber'
 import {
   ChildDeletion,
   Flags,
+  LayoutMask,
   MutationMask,
   NoFlags,
   PassiveEffect,
   PassiveMask,
   Placement,
+  Ref,
   Update,
 } from './fiberFlags'
 import { Effect, FCUpdateQueue } from './fiberHooks'
@@ -23,35 +25,8 @@ import { FunctionComponent, HostComponent, HostRoot, HostText } from './workTags
 
 let nextEffect: FiberNode | null = null
 
-export const commitMutationEffects = (finishedWork: FiberNode, root: FiberRootNode) => {
-  nextEffect = finishedWork
-  while (nextEffect !== null) {
-    // 向下遍历
-    const child: FiberNode | null = nextEffect.child
-
-    if ((nextEffect.subtreeFlags & (MutationMask | PassiveMask)) !== NoFlags && child !== null) {
-      nextEffect = child
-    } else {
-      // 找到底 或者 不包含 subtreeFlags
-      // 向上遍历 DFS
-
-      up: while (nextEffect !== null) {
-        commitMutationEffectsOnFiber(nextEffect, root)
-        const sibling: FiberNode | null = nextEffect.sibling
-
-        if (sibling !== null) {
-          nextEffect = sibling
-          break up
-        }
-
-        nextEffect = nextEffect.return
-      }
-    }
-  }
-}
-
 const commitMutationEffectsOnFiber = (finishedWork: FiberNode, root: FiberRootNode) => {
-  const flags = finishedWork.flags
+  const { flags, tag } = finishedWork
 
   if ((flags & Placement) !== NoFlags) {
     commitPlacement(finishedWork)
@@ -76,6 +51,19 @@ const commitMutationEffectsOnFiber = (finishedWork: FiberNode, root: FiberRootNo
     // 清除 flags
     finishedWork.flags &= ~PassiveEffect
   }
+  if ((flags & Ref) !== NoFlags && tag === HostComponent) {
+    safelyDetachRef(finishedWork)
+  }
+}
+
+const commitLayoutEffectsOnFiber = (finishedWork: FiberNode /* root: FiberRootNode */) => {
+  const { flags, tag } = finishedWork
+
+  if ((flags & Ref) !== NoFlags && tag === HostComponent) {
+    // 绑定新的ref
+    safelyAttachRef(finishedWork)
+    finishedWork.flags &= ~Ref
+  }
 }
 
 const commitPassiveEffects = (
@@ -98,6 +86,18 @@ const commitPassiveEffects = (
       console.error(`当 FC 存在 PassiveEffect 时，不应该不存 effect`)
     }
     root.pendingPassiveEffects[type].push(updateQueue.lastEffect!)
+  }
+}
+
+function safelyAttachRef(fiber: FiberNode) {
+  const ref = fiber.ref
+  if (ref !== null) {
+    const instance = fiber.stateNode
+    if (typeof ref === 'function') {
+      ref(instance)
+    } else {
+      ref.current = instance
+    }
   }
 }
 
@@ -226,7 +226,8 @@ const commitDeletion = (childToDelete: FiberNode, root: FiberRootNode) => {
     switch (unmountFiber.tag) {
       case HostComponent:
         recordHostChildrenToDelete(rootChildrenToDelete, unmountFiber)
-        // todo 解绑 ref
+        // 解绑ref
+        safelyDetachRef(unmountFiber)
         return
       case HostText:
         recordHostChildrenToDelete(rootChildrenToDelete, unmountFiber)
@@ -323,6 +324,56 @@ const insertOrAppendPlacementNodeIntoContainer = (
     while (sibling !== null) {
       insertOrAppendPlacementNodeIntoContainer(sibling, hostParent)
       sibling = sibling.sibling
+    }
+  }
+}
+
+const commitEffects = (
+  phrase: 'mutation' | 'layout',
+  mask: Flags,
+  callback: (fiber: FiberNode, root: FiberRootNode) => void
+) => {
+  return (finishedWork: FiberNode, root: FiberRootNode) => {
+    nextEffect = finishedWork
+
+    while (nextEffect !== null) {
+      // 向下遍历
+      const child: FiberNode | null = nextEffect.child
+
+      if ((nextEffect.subtreeFlags & mask) !== NoFlags && child !== null) {
+        nextEffect = child
+      } else {
+        // 向上遍历
+        up: while (nextEffect !== null) {
+          callback(nextEffect, root)
+          const sibling: FiberNode | null = nextEffect.sibling
+
+          if (sibling !== null) {
+            nextEffect = sibling
+            break up
+          }
+          nextEffect = nextEffect.return
+        }
+      }
+    }
+  }
+}
+
+export const commitMutationEffects = commitEffects(
+  'mutation',
+  MutationMask | PassiveMask,
+  commitMutationEffectsOnFiber
+)
+
+export const commitLayoutEffects = commitEffects('layout', LayoutMask, commitLayoutEffectsOnFiber)
+
+function safelyDetachRef(current: FiberNode) {
+  const ref = current.ref
+  if (ref !== null) {
+    if (typeof ref === 'function') {
+      ref(null)
+    } else {
+      ref.current = null
     }
   }
 }

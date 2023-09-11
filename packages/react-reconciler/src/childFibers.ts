@@ -232,7 +232,7 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
               return useFiber(before, element.props)
             }
           }
-          return createFiberFromElement(element)
+          return createFiberFromElement(element, lanes)
       }
     }
     // TODO element 是数组

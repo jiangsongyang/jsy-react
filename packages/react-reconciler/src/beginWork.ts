@@ -3,6 +3,7 @@
 import { ReactElement } from '@jsy-react/shared'
 import { mountChildFibers, reconcileChildFibers } from './childFibers'
 import { FiberNode } from './fiber'
+import { Ref } from './fiberFlags'
 import { renderWithHooks } from './fiberHooks'
 import type { Lane } from './fiberLanes'
 import { UpdateQueue, processUpdateQueue } from './updateQueue'
@@ -66,6 +67,7 @@ const updateHostRoot = (workInProgress: FiberNode, renderLean: Lane) => {
 const updateHostComponent = (workInProgress: FiberNode) => {
   const nextProps = workInProgress.pendingProps
   const nextChildren = nextProps.children
+  markRef(workInProgress.alternate, workInProgress)
   reconcileChildren(workInProgress, nextChildren)
   return workInProgress.child
 }
@@ -79,5 +81,14 @@ const reconcileChildren = (workInProgress: FiberNode, children?: ReactElement) =
   // mount about
   else {
     workInProgress.child = mountChildFibers(workInProgress, null, children)
+  }
+}
+
+function markRef(current: FiberNode | null, workInProgress: FiberNode) {
+  const ref = workInProgress.ref
+
+  // mount 时存在 ref 或者 update 时 ref引用变化
+  if ((current === null && ref !== null) || (current !== null && current.ref !== ref)) {
+    workInProgress.flags |= Ref
   }
 }
