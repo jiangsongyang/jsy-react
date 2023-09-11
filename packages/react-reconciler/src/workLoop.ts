@@ -18,7 +18,7 @@ import { MutationMask, NoFlags, PassiveMask } from './fiberFlags'
 import {
   NoLane,
   SyncLane,
-  getHeightestPriorityLane,
+  getHighestPriorityLane,
   lanesToSchedulerPriority,
   markRootFinished,
   mergeLanes,
@@ -56,7 +56,7 @@ export const scheduleUpdateOnFiber = (fiber: FiberNode, lane: Lane) => {
 }
 
 function ensureRootIsScheduled(root: FiberRootNode) {
-  const updateLane = getHeightestPriorityLane(root.pendingLanes)
+  const updateLane = getHighestPriorityLane(root.pendingLanes)
   const existingCallback = root.callbackNode
 
   if (updateLane === NoLane) {
@@ -80,11 +80,12 @@ function ensureRootIsScheduled(root: FiberRootNode) {
   }
   let newCallbackNode = null
 
+  if (__DEV__) {
+    console.log(`在${updateLane === SyncLane ? '微' : '宏'}任务中调度，优先级：`, updateLane)
+  }
+
   if (updateLane === SyncLane) {
     // 同步优先级 用微任务调度
-    if (__DEV__) {
-      console.log('在微任务中调度，优先级：', updateLane)
-    }
     // [performSyncWorkOnRoot, performSyncWorkOnRoot, performSyncWorkOnRoot]
     scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root, updateLane))
     scheduleMicroTask(flushSyncCallbacks)
@@ -166,7 +167,7 @@ export const performConcurrentWorkOnRoot: (root: FiberRootNode, didTimeout: bool
     }
   }
 
-  const lane = getHeightestPriorityLane(root.pendingLanes)
+  const lane = getHighestPriorityLane(root.pendingLanes)
   const curCallbackNode = root.callbackNode
   if (lane === NoLane) {
     return null
@@ -197,7 +198,7 @@ export const performConcurrentWorkOnRoot: (root: FiberRootNode, didTimeout: bool
 
 // 渲染阶段的入口方法
 export const performSyncWorkOnRoot = (root: FiberRootNode) => {
-  const nextLane = getHeightestPriorityLane(root.pendingLanes)
+  const nextLane = getHighestPriorityLane(root.pendingLanes)
 
   if (nextLane !== SyncLane) {
     // 其他比SyncLane低的优先级
