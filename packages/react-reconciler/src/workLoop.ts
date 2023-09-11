@@ -38,7 +38,7 @@ let rootDoesHasPassiveEffects: boolean = false
 type RootExitStatus = number
 
 const RootInComplete: RootExitStatus = 1
-const RootComplepted: RootExitStatus = 2
+const RootCompleted: RootExitStatus = 2
 
 // 初始化工作
 // 找到初始化的节点
@@ -71,6 +71,7 @@ function ensureRootIsScheduled(root: FiberRootNode) {
 
   const currentPriority = updateLane
   const prevPriority = root.callbackPriority
+  // 优先级相等 不调度
   if (currentPriority === prevPriority) {
     return
   }
@@ -148,7 +149,7 @@ const renderRoot = (root: FiberRootNode, lane: Lane, shouldTimeSlice: boolean) =
   if (!shouldTimeSlice && workInProgress !== null && __DEV__) {
     console.error(`render阶段结束时 , wip不应该是null`)
   }
-  return RootComplepted
+  return RootCompleted
 }
 
 // 并发渲染入口
@@ -156,16 +157,19 @@ export const performConcurrentWorkOnRoot: (root: FiberRootNode, didTimeout: bool
   root,
   didTimeout
 ) => {
-  const currentCallbackNode = root.callbackNode
-  // useEffect 回调都执行了
-  const didFulshPassiveEffect = flushPassiveEffects(root.pendingPassiveEffects)
-  if (didFulshPassiveEffect) {
-    if (root.callbackNode !== currentCallbackNode) {
+  const curCallback = root.callbackNode
+  const didFlushPassiveEffect = flushPassiveEffects(root.pendingPassiveEffects)
+  if (didFlushPassiveEffect) {
+    if (root.callbackNode !== curCallback) {
       return null
     }
   }
 
-  const lane = lanesToSchedulerPriority(root.pendingLanes)
+  const lane = getHeightestPriorityLane(root.pendingLanes)
+  const curCallbackNode = root.callbackNode
+  if (lane === NoLane) {
+    return null
+  }
   const needSync = lane === SyncLane || didTimeout
   // render阶段
   const exitStatus = renderRoot(root, lane, !needSync)
@@ -174,21 +178,19 @@ export const performConcurrentWorkOnRoot: (root: FiberRootNode, didTimeout: bool
 
   if (exitStatus === RootInComplete) {
     // 中断
-    if (root.callbackNode !== currentCallbackNode) {
-      // 有更高优先级任务插进来
+    if (root.callbackNode !== curCallbackNode) {
       return null
     }
     return performConcurrentWorkOnRoot.bind(null, root)
   }
-  if (exitStatus === RootComplepted) {
+  if (exitStatus === RootCompleted) {
     const finishedWork = root.current.alternate
     root.finishedWork = finishedWork
     root.finishedLane = lane
     workInProgressRenderLane = NoLane
-
-    // workinprogress fiberNode树 树中的 flags
-
     commitRoot(root)
+  } else if (__DEV__) {
+    console.error('还未实现的并发更新结束状态')
   }
 }
 
@@ -207,7 +209,7 @@ export const performSyncWorkOnRoot = (root: FiberRootNode) => {
     console.warn('render阶段开始')
   }
   const exitStatus = renderRoot(root, nextLane, false)
-  if (exitStatus === RootComplepted) {
+  if (exitStatus === RootCompleted) {
     const finishedWork = root.current.alternate
     root.finishedWork = finishedWork
     // 本次更新的 lane
