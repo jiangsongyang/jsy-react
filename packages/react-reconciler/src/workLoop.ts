@@ -3,7 +3,6 @@ import {
   unstable_NormalPriority as NormalPriority,
   unstable_scheduleCallback as scheduleCallback,
   unstable_cancelCallback,
-  unstable_scheduleCallback,
   unstable_shouldYield,
 } from 'scheduler'
 import { beginWork } from './beginWork'
@@ -69,17 +68,16 @@ function ensureRootIsScheduled(root: FiberRootNode) {
     return
   }
 
-  const currentPriority = updateLane
+  const curPriority = updateLane
   const prevPriority = root.callbackPriority
-  // 优先级相等 不调度
-  if (currentPriority === prevPriority) {
+
+  if (curPriority === prevPriority) {
     return
   }
 
   if (existingCallback !== null) {
     unstable_cancelCallback(existingCallback)
   }
-
   let newCallbackNode = null
 
   if (updateLane === SyncLane) {
@@ -87,18 +85,21 @@ function ensureRootIsScheduled(root: FiberRootNode) {
     if (__DEV__) {
       console.log('在微任务中调度，优先级：', updateLane)
     }
+    // [performSyncWorkOnRoot, performSyncWorkOnRoot, performSyncWorkOnRoot]
     scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root, updateLane))
     scheduleMicroTask(flushSyncCallbacks)
   } else {
     // 其他优先级 用宏任务调度
     const schedulerPriority = lanesToSchedulerPriority(updateLane)
-    newCallbackNode = unstable_scheduleCallback(
+
+    newCallbackNode = scheduleCallback(
       schedulerPriority,
+      // @ts-ignore
       performConcurrentWorkOnRoot.bind(null, root)
     )
   }
   root.callbackNode = newCallbackNode
-  root.callbackPriority = currentPriority
+  root.callbackPriority = curPriority
 }
 
 function markRootUpdated(root: FiberRootNode, lane: Lane) {
@@ -123,7 +124,7 @@ const markUpdateFromFiberToRoot = (fiber: FiberNode) => {
 
 const renderRoot = (root: FiberRootNode, lane: Lane, shouldTimeSlice: boolean) => {
   if (__DEV__) {
-    console.log(`开始${shouldTimeSlice} ? '并发' : '同步'更新`, root)
+    console.log(`开始${shouldTimeSlice ? '并发' : '同步'}更新`, root)
   }
   if (workInProgressRenderLane !== lane) {
     // 初始化
@@ -205,20 +206,18 @@ export const performSyncWorkOnRoot = (root: FiberRootNode) => {
     return
   }
 
-  if (__DEV__) {
-    console.warn('render阶段开始')
-  }
   const exitStatus = renderRoot(root, nextLane, false)
+
   if (exitStatus === RootCompleted) {
     const finishedWork = root.current.alternate
     root.finishedWork = finishedWork
-    // 本次更新的 lane
     root.finishedLane = nextLane
     workInProgressRenderLane = NoLane
 
-    // workinprogress fiberNode树 树中的 flags
-
+    // wip fiberNode树 树中的flags
     commitRoot(root)
+  } else if (__DEV__) {
+    console.error('还未实现的同步更新结束状态')
   }
 }
 /**

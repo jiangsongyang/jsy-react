@@ -51,6 +51,10 @@ export const lanesToSchedulerPriority = (lanes: Lanes) => {
   return unstable_IdlePriority
 }
 
+export function isSubsetOfLanes(set: Lanes, subset: Lane) {
+  return (set & subset) === subset
+}
+
 export const schedulerPriorityToLane = (priority: number) => {
   if (priority === unstable_ImmediatePriority) {
     return SyncLane
