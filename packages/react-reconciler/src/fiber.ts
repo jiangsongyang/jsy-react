@@ -1,7 +1,8 @@
 import type { Key, Props, ReactElement } from '@jsy-react/shared'
 import type { Container } from 'hostConfig'
 import { CallbackNode } from 'scheduler'
-import { Fragment, FunctionComponent, HostComponent, WorkTag } from './workTags'
+import { REACT_PROVIDER_TYPE } from '@jsy-react/shared/constants/react-symbols'
+import { ContextProvider, Fragment, FunctionComponent, HostComponent, WorkTag } from './workTags'
 import { Flags, NoFlags } from './fiberFlags'
 import { NoLane, NoLanes } from './fiberLanes'
 import type { Lane, Lanes } from './fiberLanes'
@@ -143,6 +144,10 @@ export const createFiberFromElement = (element: ReactElement): FiberNode => {
   if (typeof type === 'string') {
     // <div> => type = 'div'
     fiberTag = HostComponent
+  }
+  // context
+  else if (typeof type === 'object' && type.$$typeof === REACT_PROVIDER_TYPE) {
+    fiberTag = ContextProvider
   } else if (typeof type === 'function') {
     // function component
     fiberTag = FunctionComponent

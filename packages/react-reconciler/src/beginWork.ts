@@ -3,11 +3,19 @@
 import { ReactElement } from '@jsy-react/shared'
 import { mountChildFibers, reconcileChildFibers } from './childFibers'
 import { FiberNode } from './fiber'
+import { pushProvider } from './fiberContext'
 import { Ref } from './fiberFlags'
 import { renderWithHooks } from './fiberHooks'
 import type { Lane } from './fiberLanes'
 import { UpdateQueue, processUpdateQueue } from './updateQueue'
-import { Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from './workTags'
+import {
+  ContextProvider,
+  Fragment,
+  FunctionComponent,
+  HostComponent,
+  HostRoot,
+  HostText,
+} from './workTags'
 
 export const beginWork = (workInProgress: FiberNode, renderLean: Lane) => {
   // 返回比较完成的 子 fiberNode
@@ -22,6 +30,8 @@ export const beginWork = (workInProgress: FiberNode, renderLean: Lane) => {
       return updateFunctionComponent(workInProgress, renderLean)
     case Fragment:
       return updateFragment(workInProgress)
+    case ContextProvider:
+      return updateContextProvider(workInProgress)
     default:
       if (__DEV__) {
         console.warn(`beginWork 未实现的类型 : `, workInProgress.tag)
@@ -29,6 +39,18 @@ export const beginWork = (workInProgress: FiberNode, renderLean: Lane) => {
       break
   }
   return null
+}
+
+function updateContextProvider(wip: FiberNode) {
+  const providerType = wip.type
+  const context = providerType._context
+  const newProps = wip.pendingProps
+
+  pushProvider(context, newProps.value)
+
+  const nextChildren = newProps.children
+  reconcileChildren(wip, nextChildren)
+  return wip.child
 }
 
 const updateFragment = (workInProgress: FiberNode) => {

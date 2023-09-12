@@ -1,6 +1,6 @@
 import { Dispatch, Dispatcher } from 'react/src/currentDispatcher'
 import currentBatchConfig from 'react/src/currentBatchConfig'
-import { Action } from 'shared'
+import { Action, ReactContext } from 'shared'
 import internals from '@jsy-react/shared/internals'
 import { FiberNode } from './fiber'
 import { Flags, PassiveEffect } from './fiberFlags'
@@ -82,6 +82,7 @@ const HooksDispatcherOnMount: Dispatcher = {
   useEffect: mountEffect,
   useTransition: mountTransition,
   useRef: mountRef,
+  useContext: readContext,
 }
 
 const HooksDispatcherOnUpdate: Dispatcher = {
@@ -89,6 +90,7 @@ const HooksDispatcherOnUpdate: Dispatcher = {
   useEffect: updateEffect,
   useTransition: updateTransition,
   useRef: updateRef,
+  useContext: readContext,
 }
 
 function mountEffect(create: EffectCallback | void, deps: EffectDeps | void) {
@@ -364,4 +366,13 @@ function mountRef<T>(initialValue: T): { current: T } {
 function updateRef<T>(): { current: T } {
   const hook = updateWorkInProgresHook()
   return hook.memoizedState
+}
+
+function readContext<T>(context: ReactContext<T>): T {
+  const consumer = currentlyRenderingFiber
+  if (consumer === null) {
+    throw new Error('只能在函数组件中调用useContext')
+  }
+  const value = context._currentValue
+  return value
 }

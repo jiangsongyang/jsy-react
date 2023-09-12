@@ -3,8 +3,16 @@
 import { Container, appendInitialChild, createInstance, createTextInstance } from 'hostConfig'
 import { updateFiberProps } from 'react-dom/src/SyntheicEvent'
 import { FiberNode } from './fiber'
+import { popProvider } from './fiberContext'
 import { NoFlags, Ref, Update } from './fiberFlags'
-import { Fragment, FunctionComponent, HostComponent, HostRoot, HostText } from './workTags'
+import {
+  ContextProvider,
+  Fragment,
+  FunctionComponent,
+  HostComponent,
+  HostRoot,
+  HostText,
+} from './workTags'
 
 const markUpdate = (fiber: FiberNode) => {
   fiber.flags |= Update
@@ -69,6 +77,11 @@ export const completeWork = (workInProgress: FiberNode) => {
     case HostRoot:
     case FunctionComponent:
     case Fragment:
+      bubbleProperties(workInProgress)
+      return null
+    case ContextProvider:
+      const context = workInProgress.type._context
+      popProvider(context)
       bubbleProperties(workInProgress)
       return null
     default:

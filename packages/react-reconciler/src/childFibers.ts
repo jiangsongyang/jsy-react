@@ -200,13 +200,26 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
     return firstNewFiber
   }
 
+  function getElementKeyToUse(element: any, index?: number): Key {
+    if (
+      Array.isArray(element) ||
+      typeof element === 'string' ||
+      typeof element === 'number' ||
+      element === undefined ||
+      element === null
+    ) {
+      return index
+    }
+    return element.key !== null ? element.key : index
+  }
+
   const updateFromMap = (
     returnFiber: FiberNode,
     existingChildren: ExistingChildren,
     index: number,
     element: any
   ) => {
-    const keyToUse = element.key !== null ? element.key : index
+    const keyToUse = getElementKeyToUse(element, index)
     const before = existingChildren.get(keyToUse)
     if (typeof element === 'string' || typeof element === 'number') {
       // HOST_TEXT 可复用
@@ -232,7 +245,7 @@ export const childReconciler = (shouldTrackEffects: boolean) => {
               return useFiber(before, element.props)
             }
           }
-          return createFiberFromElement(element, lanes)
+          return createFiberFromElement(element)
       }
     }
     // TODO element 是数组

@@ -1,4 +1,4 @@
-import type { Action } from '@jsy-react/shared'
+import type { Action, ReactContext } from '@jsy-react/shared'
 
 export type Dispatch<State> = (action: Action<State>) => void
 
@@ -7,6 +7,7 @@ export interface Dispatcher {
   useEffect: (create: () => void | void, deps?: any[]) => void
   useTransition: () => [boolean, (callback: () => void) => void]
   useRef: <T>(initialValue: T) => { current: T }
+  useContext: <T>(context: ReactContext<T>) => T
 }
 
 export const currentDispatcher: { current: Dispatcher | null } = {

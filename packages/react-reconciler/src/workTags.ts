@@ -4,6 +4,7 @@ export type WorkTag =
   | typeof HostComponent
   | typeof HostText
   | typeof Fragment
+  | typeof ContextProvider
 
 export const FunctionComponent = 0
 // reactDom.createRoot 对应的 fiber
@@ -14,3 +15,5 @@ export const HostComponent = 5
 export const HostText = 6
 // <></>
 export const Fragment = 7
+// context provider
+export const ContextProvider = 8
