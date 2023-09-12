@@ -1,6 +1,7 @@
 import { Dispatch, Dispatcher } from 'react/src/currentDispatcher'
 import currentBatchConfig from 'react/src/currentBatchConfig'
-import { Action, ReactContext } from 'shared'
+import { Action, ReactContext, Thenable, Usable } from '@jsy-react/shared'
+import { REACT_CONTEXT_TYPE } from '@jsy-react/shared/constants/react-symbols'
 import internals from '@jsy-react/shared/internals'
 import { FiberNode } from './fiber'
 import { Flags, PassiveEffect } from './fiberFlags'
@@ -15,6 +16,7 @@ import {
   processUpdateQueue,
 } from './updateQueue'
 import { scheduleUpdateOnFiber } from './workLoop'
+import { trackUsedThenable } from './thenable'
 
 let currentlyRenderingFiber: FiberNode | null = null
 let workInProgressHook: Hook | null = null
@@ -83,6 +85,7 @@ const HooksDispatcherOnMount: Dispatcher = {
   useTransition: mountTransition,
   useRef: mountRef,
   useContext: readContext,
+  use,
 }
 
 const HooksDispatcherOnUpdate: Dispatcher = {
@@ -91,6 +94,7 @@ const HooksDispatcherOnUpdate: Dispatcher = {
   useTransition: updateTransition,
   useRef: updateRef,
   useContext: readContext,
+  use,
 }
 
 function mountEffect(create: EffectCallback | void, deps: EffectDeps | void) {
@@ -375,4 +379,23 @@ function readContext<T>(context: ReactContext<T>): T {
   }
   const value = context._currentValue
   return value
+}
+
+function use<T>(usable: Usable<T>): T {
+  if (usable !== null && typeof usable === 'object') {
+    if (typeof (usable as Thenable<T>).then === 'function') {
+      const thenable = usable as Thenable<T>
+      return trackUsedThenable(thenable)
+    } else if ((usable as ReactContext<T>).$$typeof === REACT_CONTEXT_TYPE) {
+      const context = usable as ReactContext<T>
+      return readContext(context)
+    }
+  }
+  throw new Error(`不支持的use参数 ${usable}`)
+}
+
+export function resetHooksOnUnwind() {
+  currentlyRenderingFiber = null
+  currentHook = null
+  workInProgressHook = null
 }

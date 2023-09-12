@@ -1,8 +1,17 @@
 import type { Key, Props, ReactElement } from '@jsy-react/shared'
 import type { Container } from 'hostConfig'
 import { CallbackNode } from 'scheduler'
-import { REACT_PROVIDER_TYPE } from '@jsy-react/shared/constants/react-symbols'
-import { ContextProvider, Fragment, FunctionComponent, HostComponent, WorkTag } from './workTags'
+import { REACT_PROVIDER_TYPE, REACT_SUSPENSE_TYPE } from '@jsy-react/shared/constants/react-symbols'
+import { Wakeable } from '@jsy-react/shared/types'
+import {
+  ContextProvider,
+  Fragment,
+  FunctionComponent,
+  HostComponent,
+  OffscreenComponent,
+  SuspenseComponent,
+  WorkTag,
+} from './workTags'
 import { Flags, NoFlags } from './fiberFlags'
 import { NoLane, NoLanes } from './fiberLanes'
 import type { Lane, Lanes } from './fiberLanes'
@@ -79,11 +88,14 @@ export class FiberRootNode {
   current: FiberNode
   finishedWork: FiberNode | null
   pendingLanes: Lanes
+  suspendedLanes: Lanes
   finishedLane: Lane
   pendingPassiveEffects: PendingPassiveEffects
 
   callbackNode: CallbackNode | null
   callbackPriority: Lane
+
+  pingCache: WeakMap<Wakeable<any>, Set<Lane>> | null
 
   constructor(container: Container, hostRootFiber: FiberNode) {
     this.container = container
@@ -91,6 +103,7 @@ export class FiberRootNode {
     hostRootFiber.stateNode = this
     this.finishedWork = null
     this.pendingLanes = NoLanes
+    this.suspendedLanes = NoLanes
     this.finishedLane = NoLanes
 
     this.callbackNode = null
@@ -100,6 +113,8 @@ export class FiberRootNode {
       unmount: [],
       update: [],
     }
+
+    this.pingCache = null
   }
 }
 
@@ -138,21 +153,18 @@ export const createWorkInProgress = (current: FiberNode, pendingProps: Props): F
 
 export const createFiberFromElement = (element: ReactElement): FiberNode => {
   const { type, key, props, ref } = element
-
   let fiberTag: WorkTag = FunctionComponent
 
   if (typeof type === 'string') {
-    // <div> => type = 'div'
+    // <div/> type: 'div'
     fiberTag = HostComponent
-  }
-  // context
-  else if (typeof type === 'object' && type.$$typeof === REACT_PROVIDER_TYPE) {
+  } else if (typeof type === 'object' && type.$$typeof === REACT_PROVIDER_TYPE) {
     fiberTag = ContextProvider
-  } else if (typeof type === 'function') {
-    // function component
-    fiberTag = FunctionComponent
+  } else if (type === REACT_SUSPENSE_TYPE) {
+    fiberTag = SuspenseComponent
+  } else if (typeof type !== 'function' && __DEV__) {
+    console.warn('为定义的type类型', element)
   }
-
   const fiber = new FiberNode(fiberTag, props, key)
   fiber.type = type
   fiber.ref = ref
@@ -161,5 +173,16 @@ export const createFiberFromElement = (element: ReactElement): FiberNode => {
 
 export const createFiberFromFragment = (elements: any[], key: Key) => {
   const fiber = new FiberNode(Fragment, elements, key)
+  return fiber
+}
+
+export interface OffscreenProps {
+  mode: 'visible' | 'hidden'
+  children: any
+}
+
+export function createFiberFromOffscreen(pendingProps: OffscreenProps) {
+  const fiber = new FiberNode(OffscreenComponent, pendingProps, null)
+  // TODO stateNode
   return fiber
 }

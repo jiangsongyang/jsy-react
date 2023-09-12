@@ -4,7 +4,8 @@ import { Container, appendInitialChild, createInstance, createTextInstance } fro
 import { updateFiberProps } from 'react-dom/src/SyntheicEvent'
 import { FiberNode } from './fiber'
 import { popProvider } from './fiberContext'
-import { NoFlags, Ref, Update } from './fiberFlags'
+import { NoFlags, Ref, Update, Visibility } from './fiberFlags'
+import { popSuspenseHandler } from './suspenseContext'
 import {
   ContextProvider,
   Fragment,
@@ -12,6 +13,8 @@ import {
   HostComponent,
   HostRoot,
   HostText,
+  OffscreenComponent,
+  SuspenseComponent,
 } from './workTags'
 
 const markUpdate = (fiber: FiberNode) => {
@@ -77,8 +80,32 @@ export const completeWork = (workInProgress: FiberNode) => {
     case HostRoot:
     case FunctionComponent:
     case Fragment:
+    case OffscreenComponent:
       bubbleProperties(workInProgress)
       return null
+    case SuspenseComponent:
+      popSuspenseHandler()
+
+      const offscreenFiber = workInProgress.child as FiberNode
+      const isHidden = offscreenFiber.pendingProps.mode === 'hidden'
+      const currentOffscreenFiber = offscreenFiber.alternate
+      // update
+      if (currentOffscreenFiber !== null) {
+        const wasHidden = currentOffscreenFiber.pendingProps.mode === 'hidden'
+
+        if (isHidden !== wasHidden) {
+          // 可见性变化
+          offscreenFiber.flags |= Visibility
+          bubbleProperties(offscreenFiber)
+        }
+      } else if (isHidden) {
+        // mount时hidden
+        offscreenFiber.flags |= Visibility
+        bubbleProperties(offscreenFiber)
+      }
+      bubbleProperties(workInProgress)
+      return null
+
     case ContextProvider:
       const context = workInProgress.type._context
       popProvider(context)
