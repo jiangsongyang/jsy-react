@@ -50,6 +50,7 @@ const RootInComplete: RootExitStatus = 1
 const RootCompleted: RootExitStatus = 2
 // 未完成状态，不用进入commit阶段
 const RootDidNotComplete = 3
+
 let workInProgressRootExitStatus: number = RootInProgress
 
 type SuspendedReason = typeof NotSuspended | typeof SuspendedOnData
@@ -158,11 +159,11 @@ const renderRoot = (root: FiberRootNode, lane: Lane, shouldTimeSlice: boolean) =
   do {
     try {
       if (workInProgressSuspendedReason !== NotSuspended && workInProgress !== null) {
-        // unwind 流程
         const thrownValue = workInProgressThrownValue
+
         workInProgressSuspendedReason = NotSuspended
         workInProgressThrownValue = null
-        // unwind 操作
+
         throwAndUnwindWorkLoop(root, workInProgress, thrownValue, lane)
       }
 
@@ -222,6 +223,7 @@ export const performConcurrentWorkOnRoot: (root: FiberRootNode, didTimeout: bool
         return null
       }
       return performConcurrentWorkOnRoot.bind(null, root)
+    // 结束
     case RootCompleted:
       const finishedWork = root.current.alternate
       root.finishedWork = finishedWork
@@ -229,6 +231,7 @@ export const performConcurrentWorkOnRoot: (root: FiberRootNode, didTimeout: bool
       workInProgressRenderLane = NoLane
       commitRoot(root)
       break
+    // 挂起
     case RootDidNotComplete:
       markRootSuspended(root, lane)
       workInProgressRenderLane = NoLane

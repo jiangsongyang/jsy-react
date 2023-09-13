@@ -33,8 +33,8 @@ export function Cpn({ id, timeout }) {
   return (
     <ul onClick={() => updateNum(num + 1)}>
       <li>ID: {id}</li>
-      <li>随机数: {data}</li>
-      <li>状态: {num}</li>
+      {/* <li>随机数: {data}</li>
+      <li>状态: {num}</li> */}
     </ul>
   )
 }

@@ -275,17 +275,19 @@ const commitDeletion = (childToDelete: FiberNode, root: FiberRootNode) => {
   childToDelete.child = null
 }
 
-const commitNestedComponent = (root: FiberNode, onCommitUnmount: (fiber: FiberNode) => void) => {
+function commitNestedComponent(root: FiberNode, onCommitUnmount: (fiber: FiberNode) => void) {
   let node = root
   while (true) {
     onCommitUnmount(node)
+
     if (node.child !== null) {
-      // 向下遍历的过程
+      // 向下遍历
       node.child.return = node
       node = node.child
       continue
     }
     if (node === root) {
+      // 终止条件
       return
     }
     while (node.sibling === null) {

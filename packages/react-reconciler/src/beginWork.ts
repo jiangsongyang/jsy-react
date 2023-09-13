@@ -68,7 +68,6 @@ function updateContextProvider(wip: FiberNode) {
 
 const updateFragment = (workInProgress: FiberNode) => {
   console.log(`updateFragment`, workInProgress)
-
   const nextChildren = workInProgress.pendingProps
   reconcileChildren(workInProgress, nextChildren)
   return workInProgress.child

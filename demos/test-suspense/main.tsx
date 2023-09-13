@@ -5,7 +5,7 @@ import { Cpn } from './Cpn'
 // 简单例子 + 没有Suspense catch的情况
 function App() {
   return (
-    <Suspense fallback={<>loading...</>}>
+    <Suspense fallback={<div>loading...</div>}>
       <Cpn id={0} timeout={1000} />
     </Suspense>
     // <Cpn id={0} timeout={1000} />
